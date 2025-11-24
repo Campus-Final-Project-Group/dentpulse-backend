@@ -2,6 +2,7 @@ package com.dentpulse.dentalsystem.controller;
 
 import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register-patient")
-    public ResponseEntity<UserDto> register(@RequestBody RegisterPatientRequest dto) {
+    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterPatientRequest dto) {
         return ResponseEntity.ok(authService.registerPatient(dto));
     }
 

@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,7 @@ public class User implements UserDetails {
     @Column(name = "user_name", length = 100)
     private String userName;
 
+    @Email
     @Column(unique = true, nullable = false)
     private String email;
 
