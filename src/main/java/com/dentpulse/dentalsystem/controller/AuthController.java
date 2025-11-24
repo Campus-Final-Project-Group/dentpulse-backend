@@ -1,0 +1,31 @@
+package com.dentpulse.dentalsystem.controller;
+
+import com.dentpulse.dentalsystem.dto.*;
+import com.dentpulse.dentalsystem.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/register-patient")
+    public ResponseEntity<UserDto> register(@RequestBody RegisterPatientRequest dto) {
+        return ResponseEntity.ok(authService.registerPatient(dto));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequest dto) {
+        return ResponseEntity.ok(authService.login(dto));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<String> me() {
+        return ResponseEntity.ok("Authenticated");
+    }
+}
