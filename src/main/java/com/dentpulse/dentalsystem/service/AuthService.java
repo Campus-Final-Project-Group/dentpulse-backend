@@ -23,12 +23,14 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // REGISTER PATIENT
     public UserDto registerPatient(RegisterPatientRequest dto) {
 
         if (userRepo.existsByEmail(dto.getEmail())) {
             throw new RuntimeException("Email already exists!");
         }
 
+        // Save USER
         User user = new User();
         user.setUserName(dto.getFullName());
         user.setEmail(dto.getEmail());
@@ -38,11 +40,14 @@ public class AuthService {
 
         User savedUser = userRepo.save(user);
 
+        // Save PATIENT
         Patient patient = new Patient();
         patient.setUser(savedUser);
         patient.setDateOfBirth(dto.getBirthDate());
+        patient.setAddress(dto.getAddress());   // 🔥 IMPORTANT
         patientRepo.save(patient);
 
+        // Response DTO
         UserDto response = new UserDto();
         response.setId(savedUser.getId());
         response.setFullName(savedUser.getUsername());
@@ -52,6 +57,7 @@ public class AuthService {
         return response;
     }
 
+    // LOGIN
     public LoginResponseDto login(LoginRequest dto) {
 
         User user = userRepo.findByEmail(dto.getEmail());

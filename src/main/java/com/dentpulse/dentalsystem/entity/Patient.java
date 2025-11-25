@@ -17,6 +17,10 @@ public class Patient {
     @Column(name = "patient_id")
     private Long id;
 
+    @Column(length = 255)
+    private String address;
+
+
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
