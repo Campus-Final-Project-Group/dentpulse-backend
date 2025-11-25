@@ -50,7 +50,7 @@ public class AuthService {
         // Response DTO
         UserDto response = new UserDto();
         response.setId(savedUser.getId());
-        response.setFullName(savedUser.getUsername());
+        response.setFullName(savedUser.getUserName());
         response.setEmail(savedUser.getEmail());
         response.setRole(savedUser.getRole().name());
 
@@ -71,7 +71,7 @@ public class AuthService {
 
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
-        userDto.setFullName(user.getUsername());
+        userDto.setFullName(user.getUserName());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRole().name());
 

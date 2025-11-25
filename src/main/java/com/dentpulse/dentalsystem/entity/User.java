@@ -47,6 +47,16 @@ public class User implements UserDetails {
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
 
+    // full name getter/setter
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     // 🔄 BIDIRECTIONAL (User ↔ Patient)
     @OneToOne(mappedBy = "user")
     private Patient patient;
