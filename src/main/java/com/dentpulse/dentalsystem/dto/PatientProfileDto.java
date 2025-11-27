@@ -1,15 +1,13 @@
 package com.dentpulse.dentalsystem.dto;
 
 import lombok.Data;
-import java.time.LocalDate;
 
 @Data
-public class RegisterPatientRequest {
+public class PatientProfileDto {
     private String fullName;
     private String email;
     private String phone;
-    private LocalDate birthDate;
-    private String password;
+    private String birthDate;
     private String address;
 
 }
