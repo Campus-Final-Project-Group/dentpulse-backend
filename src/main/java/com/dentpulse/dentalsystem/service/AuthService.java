@@ -78,7 +78,7 @@ public class AuthService {
     }
 
     //verifyEmail
-    public void verifyEmail(VerifyEmailRequest request) {
+    public String verifyEmail(VerifyEmailRequest request) {
         User user = userRepo.findByEmail(request.getEmail());
 
         if (user == null) {
@@ -107,6 +107,8 @@ public class AuthService {
         user.setOtpExpiresAt(null);
 
         userRepo.save(user);
+
+        return "Email verified successfully.";
     }
 
 

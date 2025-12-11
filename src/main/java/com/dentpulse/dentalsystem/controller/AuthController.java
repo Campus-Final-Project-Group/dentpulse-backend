@@ -24,8 +24,8 @@ public class AuthController {
 
     @PostMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestBody VerifyEmailRequest dto) {
-        authService.verifyEmail(dto);
-        return ResponseEntity.ok("Email verified successfully. You can now log in.");
+        String msg = authService.verifyEmail(dto);
+        return ResponseEntity.ok(msg);
     }
 
 
