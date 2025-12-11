@@ -23,6 +23,17 @@ public class AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private EmailService emailService;
+
+
+    private String generateOtp() {
+        int otp = (int) (Math.random() * 900000) + 100000; // 100000 - 999999
+        return String.valueOf(otp);
+    }
+
+
+
     // REGISTER PATIENT
     public UserDto registerPatient(RegisterPatientRequest dto) {
 
@@ -38,6 +49,12 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.PATIENT);
 
+        //  OTP PART
+        String otp = generateOtp();
+        user.setEmailVerified(false);
+        user.setOtpCode(otp);
+        user.setOtpExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));
+
         User savedUser = userRepo.save(user);
 
         // Save PATIENT
@@ -46,6 +63,9 @@ public class AuthService {
         patient.setDateOfBirth(dto.getBirthDate());
         patient.setAddress(dto.getAddress());   // 🔥 IMPORTANT
         patientRepo.save(patient);
+
+        // ✅ Send OTP email
+        emailService.sendOtpEmail(savedUser.getEmail(), otp);
 
         // Response DTO
         UserDto response = new UserDto();
