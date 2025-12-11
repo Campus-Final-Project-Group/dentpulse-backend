@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.dentpulse.dentalsystem.dto.VerifyEmailRequest;
+
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -19,6 +21,13 @@ public class AuthController {
     public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterPatientRequest dto) {
         return ResponseEntity.ok(authService.registerPatient(dto));
     }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestBody VerifyEmailRequest dto) {
+        String msg = authService.verifyEmail(dto);
+        return ResponseEntity.ok(msg);
+    }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequest dto) {
