@@ -64,7 +64,7 @@ public class AuthService {
         patient.setAddress(dto.getAddress());   // 🔥 IMPORTANT
         patientRepo.save(patient);
 
-        // ✅ Send OTP email
+        //  Send OTP email
         emailService.sendOtpEmail(savedUser.getEmail(), otp);
 
         // Response DTO
@@ -76,6 +76,39 @@ public class AuthService {
 
         return response;
     }
+
+    //verifyEmail
+    public void verifyEmail(VerifyEmailRequest request) {
+        User user = userRepo.findByEmail(request.getEmail());
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        if (user.isEmailVerified()) {
+            throw new RuntimeException("Email already verified!");
+        }
+
+        if (user.getOtpCode() == null || user.getOtpExpiresAt() == null) {
+            throw new RuntimeException("OTP not generated");
+        }
+
+        if (java.time.LocalDateTime.now().isAfter(user.getOtpExpiresAt())) {
+            throw new RuntimeException("OTP has expired");
+        }
+
+        if (!user.getOtpCode().equals(request.getOtp())) {
+            throw new RuntimeException("Invalid OTP code");
+        }
+
+        //  Mark as verified
+        user.setEmailVerified(true);
+        user.setOtpCode(null);
+        user.setOtpExpiresAt(null);
+
+        userRepo.save(user);
+    }
+
 
     // LOGIN
     public LoginResponseDto login(LoginRequest dto) {
