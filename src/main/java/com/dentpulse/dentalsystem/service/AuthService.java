@@ -119,6 +119,11 @@ public class AuthService {
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword()))
             throw new RuntimeException("Incorrect password!");
 
+
+        if (!user.isEmailVerified()) {
+            throw new RuntimeException("Please verify your email before logging in.");
+        }
+
         user.updateLastLogin();
         userRepo.save(user);
 
