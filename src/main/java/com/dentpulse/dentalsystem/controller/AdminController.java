@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -45,6 +46,16 @@ public class AdminController {
                 HttpStatus.NO_CONTENT
         );
     }
+
+    @PutMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<StandardResponseDto> activateAdmin(@PathVariable Long id) {
+        adminService.activateAdmin(id);
+        return ResponseEntity.ok(
+                new StandardResponseDto(200, "Admin activated successfully", null)
+        );
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<StandardResponseDto> findById(@PathVariable Long id) throws SQLException {

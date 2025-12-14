@@ -68,6 +68,21 @@ public class AdminService {
         userRepo.save(admin);
     }
 
+    public void activateAdmin(Long id) {
+        User admin = userRepo.findById(id)
+                .orElseThrow(() ->
+                        new EntryNotFoundException("Admin not found with ID: " + id));
+
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException("User is not an admin");
+        }
+
+        admin.setActive(true);
+        userRepo.save(admin);
+    }
+
+
     public ResponseAdminDto findByAdminId(Long id) {
         User admin = userRepo.findById(id)
                 .orElseThrow(() ->
