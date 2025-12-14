@@ -5,6 +5,7 @@ import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.entity.*;
 import com.dentpulse.dentalsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,11 @@ public class AuthService {
 
     @Autowired
     private EmailService emailService;
+
+    //for developer purpose I(sahan) added this line od code
+    @Value("${app.email.enabled:false}")
+    private boolean emailEnabled;
+    //------------------------------------------------------
 
 
     private String generateOtp() {
@@ -50,10 +56,27 @@ public class AuthService {
         user.setRole(Role.PATIENT);
 
         //  OTP PART
-        String otp = generateOtp();
+        /*String otp = generateOtp();
         user.setEmailVerified(false);
         user.setOtpCode(otp);
-        user.setOtpExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));
+        user.setOtpExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));*/
+
+
+        //for developer purpose I(sahan) added this line od code----------------------
+        String otp = null;
+        if (emailEnabled) {
+            otp = generateOtp();
+            user.setEmailVerified(false);
+            user.setOtpCode(otp);
+            user.setOtpExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));
+        } else {
+            // DEV MODE: auto-verify
+            user.setEmailVerified(true);
+            user.setOtpCode(null);
+            user.setOtpExpiresAt(null);
+        }
+
+        //------------------------------------------------------------------------------
 
         User savedUser = userRepo.save(user);
 
@@ -65,7 +88,14 @@ public class AuthService {
         patientRepo.save(patient);
 
         //  Send OTP email
-        emailService.sendOtpEmail(savedUser.getEmail(), otp);
+        //emailService.sendOtpEmail(savedUser.getEmail(), otp);-------------
+
+        //for developer purpose I(sahan) added this line od code
+        if (emailEnabled) {
+            emailService.sendOtpEmail(savedUser.getEmail(), otp);
+        }
+        //------------------------------------------------------------------
+
 
         // Response DTO
         UserDto response = new UserDto();
