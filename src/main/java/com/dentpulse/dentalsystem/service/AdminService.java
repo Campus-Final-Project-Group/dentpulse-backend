@@ -4,6 +4,7 @@ import com.dentpulse.dentalsystem.dto.RequestAdminDto;
 import com.dentpulse.dentalsystem.dto.ResponseAdminDto;
 import com.dentpulse.dentalsystem.entity.Role;
 import com.dentpulse.dentalsystem.entity.User;
+import com.dentpulse.dentalsystem.exception.EntryNotFoundException;
 import com.dentpulse.dentalsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,25 @@ public class AdminService {
         return toResponseAdminDto(savedAdmin);
     }
 
+    public void updateAdmin(RequestAdminDto dto, Long id) {
+
+        User admin = userRepo.findById(id)
+                .orElseThrow(() ->
+                        new EntryNotFoundException("Admin not found with ID: " + id));
+
+        // 🔒 Safety check: ensure this user is actually an ADMIN
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException("User is not an admin");
+        }
+
+        // Update allowed fields
+        admin.setUserName(dto.getUserName());
+        admin.setEmail(dto.getEmail());
+        admin.setContact(dto.getContactNumber());
+
+        userRepo.save(admin);
+    }
+
 
 
 
@@ -58,5 +78,6 @@ public class AdminService {
         dto.setUsername(user.getUserName());
         return dto;
     }
+
 
 }
