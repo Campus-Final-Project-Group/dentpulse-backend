@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -35,12 +37,10 @@ public class AdminService {
     }
 
     public void updateAdmin(RequestAdminDto dto, Long id) {
-
         User admin = userRepo.findById(id)
                 .orElseThrow(() ->
                         new EntryNotFoundException("Admin not found with ID: " + id));
 
-        // 🔒 Safety check: ensure this user is actually an ADMIN
         if (admin.getRole() != Role.ADMIN) {
             throw new RuntimeException("User is not an admin");
         }
@@ -54,7 +54,6 @@ public class AdminService {
     }
 
     public void deleteAdmin(Long id) {
-
         User admin = userRepo.findById(id)
                 .orElseThrow(() ->
                         new EntryNotFoundException("Admin not found with ID: " + id));
@@ -69,7 +68,31 @@ public class AdminService {
         userRepo.save(admin);
     }
 
+    public ResponseAdminDto findByAdminId(Long id) {
+        User admin = userRepo.findById(id)
+                .orElseThrow(() ->
+                        new EntryNotFoundException("Admin not found with ID: " + id));
 
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException("User is not an admin");
+        }
+
+       /* if (!admin.isActive()) {
+            throw new RuntimeException("Admin account is inactive");
+        }*/
+
+        return toResponseAdminDto(admin);
+    }
+
+
+    public List<ResponseAdminDto> findAllAdmins() {
+        List<User> admins = userRepo.findByRole(Role.ADMIN);
+
+        return admins.stream()
+                .map(this::toResponseAdminDto)
+                .toList();
+    }
 
 
     /* ====================== Mappers ====================== */

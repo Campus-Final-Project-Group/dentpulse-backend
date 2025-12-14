@@ -46,4 +46,20 @@ public class AdminController {
         );
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<StandardResponseDto> findById(@PathVariable Long id) throws SQLException {
+        return new ResponseEntity<>(
+                new StandardResponseDto(200,"User(Admin) Found", adminService.findByAdminId(id)),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping()
+    public ResponseEntity<StandardResponseDto> findAll() throws SQLException {
+        return new ResponseEntity<>(
+                new StandardResponseDto(200,"Admins List", adminService.findAllAdmins()),
+                HttpStatus.OK
+        );
+    }
+
 }
