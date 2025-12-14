@@ -53,6 +53,21 @@ public class AdminService {
         userRepo.save(admin);
     }
 
+    public void deleteAdmin(Long id) {
+
+        User admin = userRepo.findById(id)
+                .orElseThrow(() ->
+                        new EntryNotFoundException("Admin not found with ID: " + id));
+
+
+        if (admin.getRole() != Role.ADMIN) {
+            throw new RuntimeException("User is not an admin");
+        }
+
+        //just set active status to false and not delete the data from the table
+        admin.setActive(false);
+        userRepo.save(admin);
+    }
 
 
 
@@ -78,6 +93,7 @@ public class AdminService {
         dto.setUsername(user.getUserName());
         return dto;
     }
+
 
 
 }

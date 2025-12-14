@@ -28,12 +28,21 @@ public class AdminController {
     }
 
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<StandardResponseDto> update(@PathVariable Long id,   @RequestBody RequestAdminDto dto) throws SQLException {
         adminService.updateAdmin(dto,id);
         return new ResponseEntity<StandardResponseDto>(
                 new StandardResponseDto(201,"Admin Updated",null),
                 HttpStatus.CREATED
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<StandardResponseDto> delete(@PathVariable Long id) throws SQLException {
+        adminService.deleteAdmin(id);
+        return new ResponseEntity<StandardResponseDto>(
+                new StandardResponseDto(204,"User Deleted",null),
+                HttpStatus.NO_CONTENT
         );
     }
 
