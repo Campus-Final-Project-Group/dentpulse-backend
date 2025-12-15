@@ -61,7 +61,9 @@ public class AuthService {
         Patient patient = new Patient();
         patient.setUser(savedUser);
         patient.setDateOfBirth(dto.getBirthDate());
-        patient.setAddress(dto.getAddress());   // 🔥 IMPORTANT
+        patient.setAddress(dto.getAddress());   //  IMPORTANT
+        patient.setAccountOwner(true); // self
+
         patientRepo.save(patient);
 
         //  Send OTP email

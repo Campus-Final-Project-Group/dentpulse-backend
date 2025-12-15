@@ -56,6 +56,17 @@ public class PatientSelfController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/family/{patientId}")
+    public ResponseEntity<?> deleteFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long patientId) {
+
+        patientService.deleteFamilyMember(token.substring(7), patientId);
+        return ResponseEntity.ok().build();
+    }
+
+
+
 
 
 }

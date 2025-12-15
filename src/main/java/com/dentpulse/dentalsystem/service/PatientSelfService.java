@@ -129,8 +129,14 @@ public class PatientSelfService {
             dto.setFullName(user.getUserName()); // later patient name
             dto.setEmail(user.getEmail());
             dto.setPhone(user.getContact());
-            dto.setRelationship(i == 0 ? "Account Owner" : "Other");
-            dto.setAccountOwner(i == 0); // first patient = SELF
+            /*dto.setRelationship(i == 0 ? "Account Owner" : "Other");
+            dto.setAccountOwner(i == 0); // first patient = SELF*/
+
+            dto.setRelationship(
+                    p.isAccountOwner() ? "Account Owner" : "Other"
+            );
+            dto.setAccountOwner(p.isAccountOwner());
+
 
             result.add(dto);
         }
@@ -150,6 +156,8 @@ public class PatientSelfService {
         Patient patient = new Patient();
         patient.setUser(user); // IMPORTANT: belongs to logged-in user
         patient.setAddress(req.getAddress());
+        patient.setAccountOwner(false);
+
 
         if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
             patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
@@ -158,6 +166,29 @@ public class PatientSelfService {
         // For now we store relationship later (Step 4.4 improvement)
         patientRepo.save(patient);
     }
+
+
+    public void deleteFamilyMember(String token, Long patientId) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        Patient patient = patientRepo
+                .findByIdAndUserId(patientId, user.getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found!"));
+
+        //  Prevent deleting account owner
+        if (patient.isAccountOwner()) {
+            throw new RuntimeException("Account owner cannot be deleted!");
+        }
+
+        patientRepo.delete(patient);
+    }
+
 
 
 

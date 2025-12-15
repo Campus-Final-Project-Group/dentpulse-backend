@@ -27,4 +27,8 @@ public class Patient {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @Column(name = "is_account_owner", nullable = false)
+    private boolean accountOwner;
+
 }
