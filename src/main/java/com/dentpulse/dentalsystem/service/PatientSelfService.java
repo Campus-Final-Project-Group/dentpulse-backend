@@ -1,10 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
-import com.dentpulse.dentalsystem.dto.FamilyMemberDto;
-import com.dentpulse.dentalsystem.dto.PatientListDto;
-import com.dentpulse.dentalsystem.dto.PatientProfileDto;
-import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
+import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.entity.Patient;
 import com.dentpulse.dentalsystem.entity.User;
 import com.dentpulse.dentalsystem.repository.PatientRepository;
@@ -140,6 +137,28 @@ public class PatientSelfService {
 
         return result;
     }
+
+    public void addFamilyMember(String token, AddFamilyMemberRequest req) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        Patient patient = new Patient();
+        patient.setUser(user); // IMPORTANT: belongs to logged-in user
+        patient.setAddress(req.getAddress());
+
+        if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
+            patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
+        }
+
+        // For now we store relationship later (Step 4.4 improvement)
+        patientRepo.save(patient);
+    }
+
 
 
 

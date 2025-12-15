@@ -1,9 +1,6 @@
 package com.dentpulse.dentalsystem.controller;
 
-import com.dentpulse.dentalsystem.dto.FamilyMemberDto;
-import com.dentpulse.dentalsystem.dto.PatientListDto;
-import com.dentpulse.dentalsystem.dto.PatientProfileDto;
-import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
+import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +46,16 @@ public class PatientSelfController {
                 patientService.getMyFamilyMembers(token.substring(7))
         );
     }
+
+    @PostMapping("/family")
+    public ResponseEntity<?> addFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @RequestBody AddFamilyMemberRequest request) {
+
+        patientService.addFamilyMember(token.substring(7), request);
+        return ResponseEntity.ok().build();
+    }
+
 
 
 }
