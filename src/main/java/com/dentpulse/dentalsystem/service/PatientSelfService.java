@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
+import com.dentpulse.dentalsystem.dto.FamilyMemberDto;
 import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.PatientProfileDto;
 import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
@@ -109,6 +110,37 @@ public class PatientSelfService {
         return result;
 
     }
+
+    public List<FamilyMemberDto> getMyFamilyMembers(String token) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+
+        List<FamilyMemberDto> result = new ArrayList<>();
+
+        for (int i = 0; i < patients.size(); i++) {
+            Patient p = patients.get(i);
+
+            FamilyMemberDto dto = new FamilyMemberDto();
+            dto.setPatientId(p.getId());
+            dto.setFullName(user.getUserName()); // later patient name
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getContact());
+            dto.setRelationship(i == 0 ? "Account Owner" : "Other");
+            dto.setAccountOwner(i == 0); // first patient = SELF
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
 
 
 }

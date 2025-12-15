@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.controller;
 
+import com.dentpulse.dentalsystem.dto.FamilyMemberDto;
 import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.PatientProfileDto;
 import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
@@ -39,5 +40,15 @@ public class PatientSelfController {
                 patientService.getMyPatients(token.substring(7))
         );
     }
+
+    @GetMapping("/family")
+    public ResponseEntity<List<FamilyMemberDto>> getMyFamilyMembers(
+            @RequestHeader("Authorization") String token) {
+
+        return ResponseEntity.ok(
+                patientService.getMyFamilyMembers(token.substring(7))
+        );
+    }
+
 
 }
