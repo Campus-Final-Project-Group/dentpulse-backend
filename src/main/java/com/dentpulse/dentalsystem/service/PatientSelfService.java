@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class PatientSelfService {
@@ -24,12 +25,19 @@ public class PatientSelfService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // GET PROFILE
+    //  GET PROFILE (Temporary: get first patient of this user)
     public PatientProfileDto getMyProfile(String token) {
         String email = jwtUtil.extractEmail(token);
         User user = userRepo.findByEmail(email);
 
-        Patient patient = patientRepo.findByUserId(user.getId());
+        if (user == null) throw new RuntimeException("User not found!");
+
+        List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+        if (patients == null || patients.isEmpty()) {
+            throw new RuntimeException("No patient profile found for this user!");
+        }
+
+        Patient patient = patients.get(0); // TEMPORARY: later we will choose by patientId
 
         PatientProfileDto dto = new PatientProfileDto();
         dto.setFullName(user.getUserName());
@@ -41,19 +49,29 @@ public class PatientSelfService {
         return dto;
     }
 
-    // UPDATE PROFILE
+    //  UPDATE PROFILE (Temporary: update first patient of this user)
     public PatientProfileDto updateProfile(String token, UpdatePatientRequest req) {
         String email = jwtUtil.extractEmail(token);
 
         User user = userRepo.findByEmail(email);
-        Patient patient = patientRepo.findByUserId(user.getId());
+        if (user == null) throw new RuntimeException("User not found!");
 
+        List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+        if (patients == null || patients.isEmpty()) {
+            throw new RuntimeException("No patient profile found for this user!");
+        }
+
+        Patient patient = patients.get(0); // TEMPORARY: later we will choose by patientId
+
+        // update user fields
         user.setUserName(req.getFullName());
         user.setContact(req.getPhone());
         userRepo.save(user);
 
-        // UPDATE PATIENT SECTION (correct version)
-        patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));  // ✔ Convert String → LocalDate
+        // update patient fields
+        if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
+            patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
+        }  // ✔ Convert String → LocalDate
         patient.setAddress(req.getAddress());
         patientRepo.save(patient);
 
