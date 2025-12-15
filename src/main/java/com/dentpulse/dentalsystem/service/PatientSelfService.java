@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
+import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.PatientProfileDto;
 import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
 import com.dentpulse.dentalsystem.entity.Patient;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,4 +79,36 @@ public class PatientSelfService {
 
         return getMyProfile(token);
     }
+
+    public List<PatientListDto> getMyPatients(String token) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+        List<PatientListDto> result = new ArrayList<>();
+
+        for (Patient p : patients) {
+
+            PatientListDto dto = new PatientListDto();
+            dto.setPatientId(p.getId());
+            dto.setFullName(user.getUserName()); // temporary
+            dto.setBirthDate(
+                    p.getDateOfBirth() != null
+                            ? p.getDateOfBirth().toString()
+                            : null
+            );
+
+            result.add(dto);
+        }
+
+        return result;
+
+    }
+
+
 }

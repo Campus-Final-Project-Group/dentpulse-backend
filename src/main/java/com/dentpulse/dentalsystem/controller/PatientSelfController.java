@@ -1,11 +1,14 @@
 package com.dentpulse.dentalsystem.controller;
 
+import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.PatientProfileDto;
 import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/patient")
@@ -27,4 +30,14 @@ public class PatientSelfController {
 
         return ResponseEntity.ok(patientService.updateProfile(token.substring(7), request));
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<PatientListDto>> getMyPatients(
+            @RequestHeader("Authorization") String token) {
+
+        return ResponseEntity.ok(
+                patientService.getMyPatients(token.substring(7))
+        );
+    }
+
 }
