@@ -65,6 +65,15 @@ public class PatientSelfController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/family/{patientId}")
+    public ResponseEntity<?> updateFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long patientId,
+            @RequestBody UpdateFamilyMemberRequest request) {
+
+        patientService.updateFamilyMember(token.substring(7), patientId, request);
+        return ResponseEntity.ok().build();
+    }
 
 
 

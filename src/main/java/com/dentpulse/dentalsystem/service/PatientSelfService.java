@@ -189,6 +189,34 @@ public class PatientSelfService {
         patientRepo.delete(patient);
     }
 
+    public void updateFamilyMember(String token, Long patientId, UpdateFamilyMemberRequest req) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        Patient patient = patientRepo
+                .findByIdAndUserId(patientId, user.getId())
+                .orElseThrow(() -> new RuntimeException("Patient not found!"));
+
+        //  Prevent editing account owner
+        if (patient.isAccountOwner()) {
+            throw new RuntimeException("Account owner cannot be edited!");
+        }
+
+        // update fields
+        patient.setAddress(req.getAddress());
+
+        if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
+            patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
+        }
+
+        patientRepo.save(patient);
+    }
+
 
 
 
