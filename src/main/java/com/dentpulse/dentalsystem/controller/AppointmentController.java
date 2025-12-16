@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin
+
 @RequestMapping(value = "/api/appointments")
+@CrossOrigin(origins = "http://localhost:3000")
 
 public class AppointmentController {
     @Autowired
