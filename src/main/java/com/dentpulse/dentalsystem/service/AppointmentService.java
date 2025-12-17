@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AppointmentService {
@@ -85,5 +87,27 @@ public class AppointmentService {
         dto.setStatus(saved.getStatus().name());
 
         return dto;
+    }
+
+    public List<String> getBookedTimeSlots(String dateStr) {
+
+        // 1. Convert string date to LocalDate
+        LocalDate date = LocalDate.parse(dateStr);
+
+        // 2. Get appointments for that date (except CANCELLED)
+        List<Appointment> appointments =
+                appointmentRepo.findByAppointmentDateAndStatusNot(
+                        date,
+                        AppointmentStatus.CANCELLED
+                );
+
+        // 3. Collect booked times using for-loop
+        List<String> bookedTimes = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            bookedTimes.add(appointment.getStartTime().toString());
+        }
+
+        return bookedTimes;
     }
 }

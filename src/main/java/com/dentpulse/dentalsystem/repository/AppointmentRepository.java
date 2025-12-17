@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -15,6 +16,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     boolean existsByAppointmentDateAndStartTimeAndStatusNot(
             LocalDate appointmentDate,
             LocalTime startTime,
+            AppointmentStatus status
+    );
+
+    // Get all booked time slots for a given date (except CANCELLED)
+    List<Appointment> findByAppointmentDateAndStatusNot(
+            LocalDate appointmentDate,
             AppointmentStatus status
     );
 }

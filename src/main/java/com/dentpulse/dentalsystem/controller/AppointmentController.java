@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/appointment")
+@RequestMapping("/api/v1/appointments")
 @CrossOrigin
 public class AppointmentController {
 
@@ -25,4 +27,14 @@ public class AppointmentController {
                 appointmentService.createAppointment(token.substring(7), request)
         );
     }
+
+    @GetMapping("/booked-times")
+    public ResponseEntity<List<String>> getBookedTimeSlots(
+            @RequestParam String date
+    ) {
+        return ResponseEntity.ok(
+                appointmentService.getBookedTimeSlots(date)
+        );
+    }
+
 }
