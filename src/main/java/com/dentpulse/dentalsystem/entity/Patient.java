@@ -3,6 +3,8 @@ package com.dentpulse.dentalsystem.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.time.LocalDate;
 
@@ -24,6 +26,10 @@ public class Patient {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Appointment> appointments = new ArrayList<>();
+
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
