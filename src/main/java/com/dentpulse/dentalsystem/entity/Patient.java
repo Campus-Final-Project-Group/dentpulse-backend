@@ -22,6 +22,19 @@ public class Patient {
     @Column(length = 255)
     private String address;
 
+    @Column(name = "full_name", length = 100)
+    private String fullName;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "relationship", length = 50)
+    private String relationship;
+
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
