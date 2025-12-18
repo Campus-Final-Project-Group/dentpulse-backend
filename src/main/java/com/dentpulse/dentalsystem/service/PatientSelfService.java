@@ -268,7 +268,11 @@ public class PatientSelfService {
             throw new RuntimeException("Account owner cannot be edited!");
         }
 
-        // update fields
+        //  Update allowed family member fields
+        patient.setFullName(req.getFullName());
+        patient.setRelationship(req.getRelationship());
+        patient.setPhone(req.getPhone());
+        patient.setEmail(req.getEmail());
         patient.setAddress(req.getAddress());
 
         if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
