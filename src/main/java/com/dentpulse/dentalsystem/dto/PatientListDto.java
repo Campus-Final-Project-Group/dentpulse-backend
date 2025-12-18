@@ -7,4 +7,5 @@ public class PatientListDto {
     private Long patientId;
     private String fullName;
     private String birthDate;
+    private String relationship;
 }

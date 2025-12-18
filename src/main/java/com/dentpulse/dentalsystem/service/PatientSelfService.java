@@ -136,6 +136,11 @@ public class PatientSelfService {
                             : null
             );
 
+            //  relationship logic
+            dto.setRelationship(
+                    p.isAccountOwner() ? "You" : p.getRelationship()
+            );
+
             result.add(dto);
         }
 
