@@ -127,7 +127,9 @@ public class PatientSelfService {
 
             PatientListDto dto = new PatientListDto();
             dto.setPatientId(p.getId());
-            dto.setFullName(user.getUserName()); // temporary
+            //dto.setFullName(user.getUserName()); // temporary
+            //  correct: patient name, not user name
+            dto.setFullName(p.getFullName());
             dto.setBirthDate(
                     p.getDateOfBirth() != null
                             ? p.getDateOfBirth().toString()
