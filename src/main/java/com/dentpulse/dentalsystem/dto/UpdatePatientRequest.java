@@ -8,4 +8,5 @@ public class UpdatePatientRequest {
     private String phone;
     private String birthDate;
     private String address;
+    private String email;
 }

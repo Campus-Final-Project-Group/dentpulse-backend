@@ -60,9 +60,18 @@ public class AuthService {
         // Save PATIENT
         Patient patient = new Patient();
         patient.setUser(savedUser);
+
+        // ✅ copy identity data ONCE
+        patient.setFullName(savedUser.getUserName());
+        patient.setEmail(savedUser.getEmail());
+        patient.setPhone(savedUser.getContact());
+
+        // profile data
         patient.setDateOfBirth(dto.getBirthDate());
-        patient.setAddress(dto.getAddress());   //  IMPORTANT
-        patient.setAccountOwner(true); // self
+        patient.setAddress(dto.getAddress());
+
+        // mark as account owner
+        patient.setAccountOwner(true);
 
         patientRepo.save(patient);
 

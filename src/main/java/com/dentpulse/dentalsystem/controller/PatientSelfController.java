@@ -16,11 +16,13 @@ public class PatientSelfController {
     @Autowired
     private PatientSelfService patientService;
 
+    //  Get logged-in user's profile (ACCOUNT OWNER ONLY)
     @GetMapping("/me")
     public ResponseEntity<PatientProfileDto> getProfile(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(patientService.getMyProfile(token.substring(7)));
     }
 
+    // Update profile (email NOT allowed here)
     @PutMapping("/update")
     public ResponseEntity<PatientProfileDto> updateProfile(
             @RequestHeader("Authorization") String token,
