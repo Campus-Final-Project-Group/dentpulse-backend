@@ -12,4 +12,10 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     // Get ONE patient of a user (safe access)
     Optional<Patient> findByIdAndUserId(Long patientId, Long userId);
+
+    // Get account owner (SELF patient)
+    Patient findByUserIdAndAccountOwnerTrue(Long userId);
+
+    // Get only family members (exclude account owner)
+    List<Patient> findByUserIdAndAccountOwnerFalse(Long userId);
 }
