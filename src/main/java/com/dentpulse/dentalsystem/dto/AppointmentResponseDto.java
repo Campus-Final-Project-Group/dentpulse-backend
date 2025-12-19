@@ -10,4 +10,5 @@ public class AppointmentResponseDto {
     private String appointmentDate;
     private String startTime;
     private String status;
+    private String fullName;
 }
