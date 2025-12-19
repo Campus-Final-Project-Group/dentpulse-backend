@@ -110,4 +110,62 @@ public class AppointmentService {
 
         return bookedTimes;
     }
+
+    public List<AppointmentResponseDto> getAppointmentsForUserAndFamily(String token) {
+        String email = jwtUtil.extractEmail(token);  // Extract user email from JWT token
+        User user = userRepo.findByEmail(email);  // Fetch user by email
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        // Get all patients (self + family)
+        List<Patient> familyMembers = patientRepo.findAllByUserId(user.getId());
+
+        // Fetch appointments for the user and family members (including cancelled ones)
+        List<Appointment> appointments = new ArrayList<>();
+        for (Patient patient : familyMembers) {
+            appointments.addAll(appointmentRepo.findByPatientId(patient.getId()));  // Fetch all appointments, including cancelled ones
+        }
+
+
+        // Convert Appointment entities to DTOs
+        List<AppointmentResponseDto> appointmentDtos = new ArrayList<>();
+        for (Appointment appointment : appointments) {
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            appointmentDtos.add(dto);
+        }
+
+        return appointmentDtos;
+    }
+
+    public void cancelAppointment(Long appointmentId, String token) {
+        // Step 1: Extract user email from token
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found!");
+        }
+
+        // Step 2: Find the appointment by its ID
+        Appointment appointment = appointmentRepo.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        // Step 3: Check if the user has permission to cancel this appointment
+        if (!appointment.getPatient().getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("This appointment does not belong to the current user");
+        }
+
+        // Step 4: Cancel appointment
+        appointmentRepo.delete(appointment);  // DELETE the appointment entirely from the database
+    }
+
+
 }

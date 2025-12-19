@@ -24,4 +24,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             LocalDate appointmentDate,
             AppointmentStatus status
     );
+
+    // Get all appointments for a specific patient (including cancelled)
+    List<Appointment> findByPatientId(Long patientId);
 }

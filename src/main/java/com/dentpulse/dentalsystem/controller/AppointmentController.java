@@ -37,4 +37,20 @@ public class AppointmentController {
         );
     }
 
+    @GetMapping("/my-appointments")
+    public ResponseEntity<List<AppointmentResponseDto>> getMyAppointments(@RequestHeader("Authorization") String token) {
+        List<AppointmentResponseDto> appointments = appointmentService.getAppointmentsForUserAndFamily(token.substring(7));
+        return ResponseEntity.ok(appointments);
+    }
+
+    // Cancel an appointment (DELETE)
+    @DeleteMapping("/{appointmentId}")
+    public ResponseEntity<?> cancelAppointment(
+            @PathVariable Long appointmentId,
+            @RequestHeader("Authorization") String token
+    ) {
+        appointmentService.cancelAppointment(appointmentId, token.substring(7));
+        return ResponseEntity.ok("Appointment has been cancelled successfully");
+    }
+
 }
