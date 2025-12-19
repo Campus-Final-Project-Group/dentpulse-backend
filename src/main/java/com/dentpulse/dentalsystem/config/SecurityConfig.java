@@ -28,7 +28,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/dentpulse/api/v1/admin/create").permitAll()
+                        .requestMatchers("/dentpulse/api/v1/admin/**").permitAll()
                         //.requestMatchers("/dentpulse/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
