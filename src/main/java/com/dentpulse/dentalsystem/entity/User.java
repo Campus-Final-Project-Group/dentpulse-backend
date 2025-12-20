@@ -57,6 +57,11 @@ public class User implements UserDetails {
     @Column(name = "otp_expires_at")
     private LocalDateTime otpExpiresAt;
 
+    @Column(name = "forgot_password_verified")
+    private Boolean forgotPasswordVerified = false;
+
+
+
     // full name getter/setter
 
     public String getUserName() {

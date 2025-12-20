@@ -38,4 +38,39 @@ public class AuthController {
     public ResponseEntity<String> me() {
         return ResponseEntity.ok("Authenticated");
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody ForgotPasswordRequest request
+    ) {
+        authService.sendForgotPasswordOtp(request.getEmail());
+        return ResponseEntity.ok("OTP sent to your email");
+    }
+
+    @PostMapping("/forgot-password/verify-otp")
+    public ResponseEntity<String> verifyForgotPasswordOtp(
+            @RequestBody VerifyForgotPasswordOtpRequest request
+    ) {
+        authService.verifyForgotPasswordOtp(
+                request.getEmail(),
+                request.getOtp()
+        );
+
+        return ResponseEntity.ok("OTP verified successfully");
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<String> resetPassword(
+            @RequestBody ResetPasswordRequest request
+    ) {
+        authService.resetPassword(
+                request.getEmail(),
+                request.getNewPassword()
+        );
+
+        return ResponseEntity.ok("Password reset successful");
+    }
+
+
+
 }
