@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.dto;
 
+import com.dentpulse.dentalsystem.entity.MedicineStatus;
 import lombok.*;
 
 @Getter
@@ -13,5 +14,5 @@ public class MedicineDTO {
     private String dosage;
     private String brand;
     private int quantity;
-    private String medicineStatus;
+    private MedicineStatus medicineStatus;
 }

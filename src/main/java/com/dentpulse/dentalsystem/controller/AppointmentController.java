@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
 
@@ -29,6 +31,12 @@ public class AppointmentController {
 
         return appointmentService.getAllAppointments();
     }
+
+    @GetMapping("/status")
+    public Map<String, Long> getAppointmentStats() {
+        return appointmentService.getAppointmentStats();
+    }
+
 
 
 

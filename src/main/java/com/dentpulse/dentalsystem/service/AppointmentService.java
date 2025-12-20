@@ -3,6 +3,7 @@ package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.dto.AppointmentDTO;
 import com.dentpulse.dentalsystem.entity.Appointment;
+import com.dentpulse.dentalsystem.entity.AppointmentStatus;
 import com.dentpulse.dentalsystem.repository.AppointmentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ import org.modelmapper.TypeToken;
 import java.time.LocalDate;
 import java.sql.Date;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Service
 @Transactional
@@ -32,6 +36,20 @@ public class AppointmentService {
                 }.getType()
         );
     }
+
+
+    public Map<String, Long> getAppointmentStats() {
+
+        Map<String, Long> status = new HashMap<>();
+
+        status.put("total", appointmentRepo.count());
+        status.put("scheduled", appointmentRepo.countByStatus(AppointmentStatus.SCHEDULED));
+        status.put("completed", appointmentRepo.countByStatus(AppointmentStatus.COMPLETED));
+        status.put("cancelled", appointmentRepo.countByStatus(AppointmentStatus.CANCELLED));
+
+        return status;
+    }
+
 
 /*    public List<AppointmentDTO> getTodayAppointments() {
         LocalDate today = LocalDate.now();
