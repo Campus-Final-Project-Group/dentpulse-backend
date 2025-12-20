@@ -61,7 +61,7 @@ public class AuthService {
         Patient patient = new Patient();
         patient.setUser(savedUser);
 
-        // ✅ copy identity data ONCE
+        //  copy identity data ONCE
         patient.setFullName(savedUser.getUserName());
         patient.setEmail(savedUser.getEmail());
         patient.setPhone(savedUser.getContact());
@@ -150,4 +150,90 @@ public class AuthService {
 
         return new LoginResponseDto(userDto, token);
     }
+
+    public void sendForgotPasswordOtp(String email) {
+
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found with this email");
+        }
+
+        // Generate 6-digit OTP
+        String otp = generateOtp();
+        // IMPORTANT
+        user.setForgotPasswordVerified(false);
+
+        user.setOtpCode(otp);
+        user.setOtpExpiresAt(java.time.LocalDateTime.now().plusMinutes(10));
+
+
+        userRepo.save(user);
+
+        //  reuse existing email service
+        emailService.sendOtpEmail(user.getEmail(), otp);
+    }
+
+
+    public void verifyForgotPasswordOtp(String email, String otp) {
+
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        if (user.getOtpCode() == null || user.getOtpExpiresAt() == null) {
+            throw new RuntimeException("OTP not generated");
+        }
+
+        // check expiry
+        if (java.time.LocalDateTime.now().isAfter(user.getOtpExpiresAt())) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        // check OTP match
+        if (!user.getOtpCode().equals(otp)) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        // OTP verified successfully
+        user.setForgotPasswordVerified(true);
+
+        // IMPORTANT: mark OTP as used (one-time)
+        user.setOtpCode(null);
+        user.setOtpExpiresAt(null);
+
+        userRepo.save(user);
+    }
+
+
+    public void resetPassword(String email, String newPassword) {
+
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        //  MAIN SECURITY CHECK
+        if (!Boolean.TRUE.equals(user.getForgotPasswordVerified())) {
+            throw new RuntimeException("OTP verification required");
+        }
+
+        // Encode new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Safety: make sure OTP is already cleared
+        user.setOtpCode(null);
+        user.setOtpExpiresAt(null);
+
+        //  RESET THE FLAG (ONE-TIME USE)
+        user.setForgotPasswordVerified(false);
+
+        userRepo.save(user);
+    }
+
+
+
 }
