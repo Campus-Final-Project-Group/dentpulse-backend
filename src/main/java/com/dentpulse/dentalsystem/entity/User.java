@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import com.dentpulse.dentalsystem.entity.AuthProvider;
+
 
 @Entity
 @Data
@@ -38,6 +40,11 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
 
     @Column(name = "is_active")
     private boolean active = true;
