@@ -26,6 +26,9 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private GoogleTokenVerifier googleTokenVerifier;
+
 
     private String generateOtp() {
         int otp = (int) (Math.random() * 900000) + 100000; // 100000 - 999999
@@ -234,6 +237,68 @@ public class AuthService {
         userRepo.save(user);
     }
 
+    public LoginResponseDto googleLogin(String idToken) {
+
+        // 1. Verify Google token
+        var payload = googleTokenVerifier.verify(idToken);
+
+        // 2. Extract safe fields
+        String googleId = googleTokenVerifier.getGoogleId(payload);
+        String email = googleTokenVerifier.getEmail(payload);
+        String name = googleTokenVerifier.getName(payload);
+
+        if (!googleTokenVerifier.isEmailVerified(payload)) {
+            throw new RuntimeException("Google email not verified");
+        }
+
+        // 3. Check if user exists
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            //  REGISTER NEW GOOGLE USER
+
+            user = new User();
+            user.setUserName(name);
+            user.setEmail(email);
+            user.setContact("GOOGLE");
+            user.setPassword("GOOGLE_AUTH"); // dummy
+            user.setRole(Role.PATIENT);
+            user.setAuthProvider(AuthProvider.GOOGLE);
+            user.setEmailVerified(true);
+
+            user = userRepo.save(user);
+
+            // Create patient profile
+            Patient patient = new Patient();
+            patient.setUser(user);
+            patient.setFullName(name);
+            patient.setEmail(email);
+            patient.setAccountOwner(true);
+
+            patientRepo.save(patient);
+        }
+
+        //  Prevent Google user logging in via password
+        if (user.getAuthProvider() != AuthProvider.GOOGLE) {
+            throw new RuntimeException("Please login using email & password");
+        }
+
+        // 4. Update last login
+        user.updateLastLogin();
+        userRepo.save(user);
+
+        // 5. Generate JWT
+        String token = jwtUtil.generateToken(user.getEmail());
+
+        // 6. Response
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setFullName(user.getUserName());
+        userDto.setEmail(user.getEmail());
+        userDto.setRole(user.getRole().name());
+
+        return new LoginResponseDto(userDto, token);
+    }
 
 
 }
