@@ -71,6 +71,15 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successful");
     }
 
+    @PostMapping("/google-login")
+    public ResponseEntity<LoginResponseDto> googleLogin(
+            @RequestBody GoogleLoginRequest request
+    ) {
+        return ResponseEntity.ok(
+                authService.googleLogin(request.getIdToken())
+        );
+    }
+
 
 
 }
