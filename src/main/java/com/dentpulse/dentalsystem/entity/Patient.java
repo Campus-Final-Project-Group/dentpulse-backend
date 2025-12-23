@@ -22,12 +22,11 @@ public class Patient {
     private String address;
 
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
     @Column(name ="patient_name")
-    private String patient_name;
+    private String fullName;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
