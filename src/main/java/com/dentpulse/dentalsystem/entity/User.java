@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,9 +58,9 @@ public class User implements UserDetails {
         this.userName = userName;
     }
 
-    // 🔄 BIDIRECTIONAL (User ↔ Patient)
-    @OneToOne(mappedBy = "user")
-    private Patient patient;
+    // 🔄 BIDIRECTIONAL (User ↔️ Patient)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Patient> patients = new ArrayList<>();
 
     @PrePersist
     public void onCreate() {
