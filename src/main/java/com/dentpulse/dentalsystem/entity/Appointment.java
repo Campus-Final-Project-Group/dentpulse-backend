@@ -6,8 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.sql.Date;
+import java.time.LocalTime;
 
 
 @Table(name = "appointment")
@@ -21,23 +23,23 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")
-    private int appointment_id;
+    private Long appointmentId;
 
     @Column(name = "appointment_date",nullable = false)
-    private Date appointment_date;
+    private LocalDate appointmentDate;
 
     @Column(name = "start_time",nullable = false)
-    private Time start_time;
+    private LocalTime startTime;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column(name = "patient_id",nullable = false)
-    private int patient_id;
+    private int patientId;
 
 }
 
