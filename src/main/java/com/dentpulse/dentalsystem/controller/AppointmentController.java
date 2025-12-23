@@ -2,16 +2,22 @@ package com.dentpulse.dentalsystem.controller;
 
 import com.dentpulse.dentalsystem.dto.AppointmentResponseDto;
 import com.dentpulse.dentalsystem.dto.CreateAppointmentRequest;
+import com.dentpulse.dentalsystem.dto.AppointmentDTO;
 import com.dentpulse.dentalsystem.service.AppointmentService;
+import com.dentpulse.dentalsystem.service.TreatmentRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 
 @RestController
-@RequestMapping("/api/appointments")
-@CrossOrigin
+
+@RequestMapping(value = "/api/appointments")
+@CrossOrigin(origins = "http://localhost:3000")
+
 public class AppointmentController {
 
     @Autowired
@@ -51,6 +57,17 @@ public class AppointmentController {
     ) {
         appointmentService.cancelAppointment(appointmentId, token.substring(7));
         return ResponseEntity.ok("Appointment has been cancelled successfully");
+    }
+
+    @GetMapping
+    public List<AppointmentDTO> getAppointments(){
+
+        return appointmentService.getAllAppointments();
+    }
+
+    @GetMapping("/status")
+    public Map<String, Long> getAppointmentStats() {
+        return appointmentService.getAppointmentStats();
     }
 
 }

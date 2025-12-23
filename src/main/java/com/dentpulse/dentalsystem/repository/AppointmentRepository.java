@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -27,4 +28,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     // Get all appointments for a specific patient (including cancelled)
     List<Appointment> findByPatientId(Long patientId);
+
+    /*
+    List<Appointment> findByAppointment_dateOrderByStartTimeAsc(Date appointmentDate);
+*/
+    long countByStatus(AppointmentStatus status);
+
+
 }

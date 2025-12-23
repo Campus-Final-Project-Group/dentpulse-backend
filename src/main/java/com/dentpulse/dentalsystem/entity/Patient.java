@@ -50,4 +50,7 @@ public class Patient {
     @Column(name = "is_account_owner", nullable = false)
     private boolean accountOwner;
 
+
+    @OneToMany(mappedBy = "patient")
+    private List<TreatmentRecord> treatment_record;
 }

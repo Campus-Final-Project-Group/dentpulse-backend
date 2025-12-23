@@ -35,6 +35,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String contact;
 
+
     @Column(nullable = false)
     private String password;
 

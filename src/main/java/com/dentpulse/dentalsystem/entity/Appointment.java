@@ -1,11 +1,14 @@
 package com.dentpulse.dentalsystem.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.sql.Date;
 import java.time.LocalTime;
 
 @Entity
@@ -15,8 +18,10 @@ import java.time.LocalTime;
                 columnNames = {"appointment_date", "start_time"}
         )
 )
-@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Data
+
 public class Appointment {
 
     @Id
@@ -40,6 +45,8 @@ public class Appointment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+
 
     @PrePersist
     public void onCreate() {
