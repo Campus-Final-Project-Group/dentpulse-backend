@@ -3,10 +3,11 @@ package com.dentpulse.dentalsystem.dto;
 import lombok.Data;
 
 @Data
-public class UpdatePatientRequest {
+public class UpdateFamilyMemberRequest {
     private String fullName;
+    private String relationship;
     private String phone;
-    private String birthDate;
-    private String address;
     private String email;
+    private String address;
+    private String birthDate;
 }

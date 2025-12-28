@@ -1,11 +1,12 @@
 package com.dentpulse.dentalsystem.controller;
 
-import com.dentpulse.dentalsystem.dto.PatientProfileDto;
-import com.dentpulse.dentalsystem.dto.UpdatePatientRequest;
+import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/patient")
@@ -15,11 +16,13 @@ public class PatientSelfController {
     @Autowired
     private PatientSelfService patientService;
 
+    //  Get logged-in user's profile (ACCOUNT OWNER ONLY)
     @GetMapping("/me")
     public ResponseEntity<PatientProfileDto> getProfile(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(patientService.getMyProfile(token.substring(7)));
     }
 
+    // Update profile (email NOT allowed here)
     @PutMapping("/update")
     public ResponseEntity<PatientProfileDto> updateProfile(
             @RequestHeader("Authorization") String token,
@@ -27,4 +30,54 @@ public class PatientSelfController {
 
         return ResponseEntity.ok(patientService.updateProfile(token.substring(7), request));
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<PatientListDto>> getMyPatients(
+            @RequestHeader("Authorization") String token) {
+
+        return ResponseEntity.ok(
+                patientService.getMyPatients(token.substring(7))
+        );
+    }
+
+    @GetMapping("/family")
+    public ResponseEntity<List<FamilyMemberDto>> getMyFamilyMembers(
+            @RequestHeader("Authorization") String token) {
+
+        return ResponseEntity.ok(
+                patientService.getMyFamilyMembers(token.substring(7))
+        );
+    }
+
+    @PostMapping("/family")
+    public ResponseEntity<?> addFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @RequestBody AddFamilyMemberRequest request) {
+
+        patientService.addFamilyMember(token.substring(7), request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/family/{patientId}")
+    public ResponseEntity<?> deleteFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long patientId) {
+
+        patientService.deleteFamilyMember(token.substring(7), patientId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/family/{patientId}")
+    public ResponseEntity<?> updateFamilyMember(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long patientId,
+            @RequestBody UpdateFamilyMemberRequest request) {
+
+        patientService.updateFamilyMember(token.substring(7), patientId, request);
+        return ResponseEntity.ok().build();
+    }
+
+
+
+
 }

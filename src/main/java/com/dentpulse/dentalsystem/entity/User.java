@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import com.dentpulse.dentalsystem.entity.AuthProvider;
+
 
 @Entity
 @Data
@@ -33,11 +35,17 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String contact;
 
+
     @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
 
     @Column(name = "is_active")
     private boolean active = true;
@@ -47,6 +55,20 @@ public class User implements UserDetails {
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+    @Column(name = "otp_code", length = 10)
+    private String otpCode;
+
+    @Column(name = "otp_expires_at")
+    private LocalDateTime otpExpiresAt;
+
+    @Column(name = "forgot_password_verified")
+    private Boolean forgotPasswordVerified = false;
+
+
 
     // full name getter/setter
 
@@ -58,9 +80,10 @@ public class User implements UserDetails {
         this.userName = userName;
     }
 
-    // 🔄 BIDIRECTIONAL (User ↔️ Patient)
+    // 🔄 BIDIRECTIONAL (User ↔ Patient)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Patient> patients = new ArrayList<>();
+
 
     @PrePersist
     public void onCreate() {
