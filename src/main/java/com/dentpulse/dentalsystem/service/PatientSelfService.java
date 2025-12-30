@@ -53,6 +53,7 @@ public class PatientSelfService {
         dto.setFullName(patient.getFullName());
         dto.setEmail(patient.getEmail());
         dto.setPhone(patient.getPhone());
+        dto.setGender(patient.getGender());
 
         dto.setBirthDate(patient.getDateOfBirth() != null ? patient.getDateOfBirth().toString() : null);
         dto.setAddress(patient.getAddress());
@@ -99,6 +100,7 @@ public class PatientSelfService {
         */
         // update patient-owned fields only
         patient.setFullName(req.getFullName());
+        patient.setGender(req.getGender());
         //patient.setPhone(req.getPhone());
 
 
@@ -190,6 +192,7 @@ public class PatientSelfService {
             dto.setPhone(p.getPhone());
             dto.setRelationship(p.getRelationship());
             dto.setAccountOwner(p.isAccountOwner());
+            dto.setGender(p.getGender());
 
             result.add(dto);
         }
@@ -216,6 +219,7 @@ public class PatientSelfService {
         patient.setEmail(req.getEmail());
         patient.setPhone(req.getPhone());
         patient.setRelationship(req.getRelationship());
+        patient.setGender(req.getGender());
 
         patient.setAddress(req.getAddress());
         patient.setAccountOwner(false);
@@ -274,6 +278,7 @@ public class PatientSelfService {
         patient.setPhone(req.getPhone());
         patient.setEmail(req.getEmail());
         patient.setAddress(req.getAddress());
+        patient.setGender(req.getGender());
 
         if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
             patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));

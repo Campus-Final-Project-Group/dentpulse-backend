@@ -11,5 +11,6 @@ public class RegisterPatientRequest {
     private LocalDate birthDate;
     private String password;
     private String address;
+    private String gender;
 
 }

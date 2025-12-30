@@ -68,9 +68,15 @@ public class User implements UserDetails {
     @Column(name = "forgot_password_verified")
     private Boolean forgotPasswordVerified = false;
 
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+
 
 
     // full name getter/setter
+
+
 
     public String getUserName() {
         return userName;

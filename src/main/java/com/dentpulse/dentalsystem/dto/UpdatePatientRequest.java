@@ -9,4 +9,5 @@ public class UpdatePatientRequest {
     private String birthDate;
     private String address;
     private String email;
+    private String gender;
 }

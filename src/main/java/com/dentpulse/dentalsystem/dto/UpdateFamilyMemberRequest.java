@@ -10,4 +10,5 @@ public class UpdateFamilyMemberRequest {
     private String email;
     private String address;
     private String birthDate;
+    private String gender;
 }

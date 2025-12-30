@@ -51,6 +51,8 @@ public class AuthService {
         user.setContact(dto.getPhone());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.PATIENT);
+        user.setGender(dto.getGender());
+
 
         //  OTP PART
         String otp = generateOtp();
@@ -72,6 +74,7 @@ public class AuthService {
         // profile data
         patient.setDateOfBirth(dto.getBirthDate());
         patient.setAddress(dto.getAddress());
+        patient.setGender(savedUser.getGender());
 
         // mark as account owner
         patient.setAccountOwner(true);
@@ -87,6 +90,8 @@ public class AuthService {
         response.setFullName(savedUser.getUserName());
         response.setEmail(savedUser.getEmail());
         response.setRole(savedUser.getRole().name());
+        response.setGender(savedUser.getGender());
+
 
         return response;
     }
@@ -148,6 +153,7 @@ public class AuthService {
         userDto.setFullName(user.getUserName());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRole().name());
+        userDto.setGender(user.getGender());
 
         String token = jwtUtil.generateToken(user.getEmail());
 
@@ -246,6 +252,13 @@ public class AuthService {
         String googleId = googleTokenVerifier.getGoogleId(payload);
         String email = googleTokenVerifier.getEmail(payload);
         String name = googleTokenVerifier.getName(payload);
+        //String gender = (String) payload.get("gender");
+        String gender = googleTokenVerifier.getGender(payload);
+
+        // Validate gender to be either "male" or "female"
+        if (gender == null || (!gender.equals("male") && !gender.equals("female"))) {
+            throw new RuntimeException("Invalid gender provided. Only 'male' or 'female' are allowed.");
+        }
 
         if (!googleTokenVerifier.isEmailVerified(payload)) {
             throw new RuntimeException("Google email not verified");
@@ -265,6 +278,7 @@ public class AuthService {
             user.setRole(Role.PATIENT);
             user.setAuthProvider(AuthProvider.GOOGLE);
             user.setEmailVerified(true);
+            user.setGender(gender);
 
             user = userRepo.save(user);
 
@@ -274,6 +288,7 @@ public class AuthService {
             patient.setFullName(name);
             patient.setEmail(email);
             patient.setAccountOwner(true);
+            patient.setGender(gender);
 
             patientRepo.save(patient);
         }
@@ -296,6 +311,7 @@ public class AuthService {
         userDto.setFullName(user.getUserName());
         userDto.setEmail(user.getEmail());
         userDto.setRole(user.getRole().name());
+        userDto.setGender(user.getGender());
 
         return new LoginResponseDto(userDto, token);
     }
