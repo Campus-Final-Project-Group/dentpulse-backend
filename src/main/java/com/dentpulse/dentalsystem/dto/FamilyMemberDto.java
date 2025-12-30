@@ -9,5 +9,6 @@ public class FamilyMemberDto {
     private String email;
     private String phone;
     private String relationship;
+    private String gender;
     private boolean accountOwner;
 }

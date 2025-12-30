@@ -11,4 +11,5 @@ public class AddFamilyMemberRequest {
     private String phone;
     private String birthDate; // yyyy-MM-dd
     private String address;
+    private String gender;
 }
