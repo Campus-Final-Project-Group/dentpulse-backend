@@ -150,6 +150,44 @@ public class PatientSelfService {
 
     }
 
+    public PatientProfileForTableDto getMyProfileFortabel(String token) {
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) throw new RuntimeException("User not found!");
+
+
+        //  Always get account owner patient
+        Patient patient = patientRepo
+                .findByUserIdAndAccountOwnerTrue(user.getId());
+
+        if (patient == null) {
+            throw new RuntimeException("Account owner patient not found!");
+        }
+        //List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+
+        /*if (patients == null || patients.isEmpty()) {
+            throw new RuntimeException("No patient profile found for this user!");
+        }*/
+
+        //Patient patient = patients.get(0); // TEMPORARY: later we will choose by patientId
+
+        PatientProfileForTableDto dto = new PatientProfileForTableDto();
+        dto.setPatientId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setEmail(patient.getEmail());
+        dto.setPhone(patient.getPhone());
+        dto.setGender(patient.getGender());
+        dto.setAccountOwner(patient.isAccountOwner());
+        dto.setRelationship(
+                patient.isAccountOwner() ? "Account Owner" : patient.getRelationship()
+        );
+
+
+        return dto;
+    }
+
+
     public List<FamilyMemberDto> getMyFamilyMembers(String token) {
 
         String email = jwtUtil.extractEmail(token);
