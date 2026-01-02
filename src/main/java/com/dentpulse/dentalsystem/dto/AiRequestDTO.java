@@ -7,7 +7,7 @@ public class AiRequestDTO {
     private int weekdayOrWeekend;
     private int month;
     private int dayOfWeek;
-    private int hour;
-    private int pastAppointments;
+    private double hour;
+//    private int pastAppointments;
 }
 
