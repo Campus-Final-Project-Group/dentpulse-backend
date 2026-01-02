@@ -49,6 +49,12 @@ public class PatientSelfController {
         );
     }
 
+    @GetMapping("/mefortable")
+    public ResponseEntity<PatientProfileForTableDto> getProfileForTable(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(patientService.getMyProfileFortabel(token.substring(7)));
+    }
+
+
     @PostMapping("/family")
     public ResponseEntity<?> addFamilyMember(
             @RequestHeader("Authorization") String token,
