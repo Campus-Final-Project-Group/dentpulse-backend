@@ -39,6 +39,10 @@ public class Appointment {
     @Column(nullable = false)
     private AppointmentStatus status;
 
+    //  JUST STRING (admin will update later)
+    @Column(name = "type", nullable = false)
+    private String type;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -52,5 +56,8 @@ public class Appointment {
     public void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (status == null) status = AppointmentStatus.PENDING;
+        if (type == null) {
+            type = "Checkup"; //  DEFAULT
+        }
     }
 }

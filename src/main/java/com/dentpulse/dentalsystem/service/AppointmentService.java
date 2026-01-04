@@ -91,12 +91,26 @@ public class AppointmentService {
         LocalTime time = LocalTime.parse(request.getStartTime());
 
         // 4. Check slot availability
+//        boolean alreadyBooked =
+//                appointmentRepo.existsByAppointmentDateAndStartTimeAndStatusNot(
+//                        date,
+//                        time,
+//                        AppointmentStatus.CANCELLED
+//                );
+
+        List<AppointmentStatus> blockingStatuses = List.of(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED,
+                AppointmentStatus.SCHEDULED
+        );
+
         boolean alreadyBooked =
-                appointmentRepo.existsByAppointmentDateAndStartTimeAndStatusNot(
+                appointmentRepo.existsByAppointmentDateAndStartTimeAndStatusIn(
                         date,
                         time,
-                        AppointmentStatus.CANCELLED
+                        blockingStatuses
                 );
+
 
         if (alreadyBooked) {
             throw new RuntimeException("This time slot is already booked");
@@ -107,8 +121,11 @@ public class AppointmentService {
         appointment.setPatient(patient);
         appointment.setAppointmentDate(date);
         appointment.setStartTime(time);
-        appointment.setStatus(AppointmentStatus.PENDING);
-        appointment.setCreatedAt(LocalDateTime.now());
+
+        //  REMOVE these (PrePersist handles them)
+        // appointment.setStatus(AppointmentStatus.PENDING);
+        // appointment.setCreatedAt(LocalDateTime.now());
+        // appointment.setType("Checkup");
 
         Appointment saved = appointmentRepo.save(appointment);
 
@@ -116,9 +133,11 @@ public class AppointmentService {
         AppointmentResponseDto dto = new AppointmentResponseDto();
         dto.setAppointmentId(saved.getId());
         dto.setPatientId(patient.getId());
+        dto.setFullName(patient.getFullName());
         dto.setAppointmentDate(saved.getAppointmentDate().toString());
         dto.setStartTime(saved.getStartTime().toString());
         dto.setStatus(saved.getStatus().name());
+        dto.setType(saved.getType());
 
         return dto;
     }
@@ -129,11 +148,22 @@ public class AppointmentService {
         LocalDate date = LocalDate.parse(dateStr);
 
         // 2. Get appointments for that date (except CANCELLED)
+//        List<Appointment> appointments =
+//                appointmentRepo.findByAppointmentDateAndStatusNot(
+//                        date,
+//                        AppointmentStatus.CANCELLED
+//                );
+
+        List<AppointmentStatus> blockingStatuses = List.of(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED,
+                AppointmentStatus.SCHEDULED
+        );
+
         List<Appointment> appointments =
-                appointmentRepo.findByAppointmentDateAndStatusNot(
-                        date,
-                        AppointmentStatus.CANCELLED
-                );
+                appointmentRepo.findByAppointmentDateAndStatusIn(date, blockingStatuses);
+
+
 
         // 3. Collect booked times using for-loop
         List<String> bookedTimes = new ArrayList<>();
@@ -173,7 +203,9 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
             appointmentDtos.add(dto);
+
         }
 
         return appointmentDtos;
@@ -196,6 +228,17 @@ public class AppointmentService {
         if (!appointment.getPatient().getUser().getId().equals(user.getId())) {
             throw new RuntimeException("This appointment does not belong to the current user");
         }
+
+        // Step 4: Allow delete ONLY if PENDING or CANCELLED
+        if (appointment.getStatus() != AppointmentStatus.PENDING &&
+                appointment.getStatus() != AppointmentStatus.CANCELLED) {
+
+            throw new RuntimeException(
+                    "You can't delete this appointment. Please contact us."
+            );
+        }
+
+
 
         // Step 4: Cancel appointment
         appointmentRepo.delete(appointment);  // DELETE the appointment entirely from the database

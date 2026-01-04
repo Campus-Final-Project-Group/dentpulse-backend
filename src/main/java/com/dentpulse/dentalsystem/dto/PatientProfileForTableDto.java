@@ -3,13 +3,16 @@ package com.dentpulse.dentalsystem.dto;
 import lombok.Data;
 
 @Data
-public class PatientListDto {
+
+public class PatientProfileForTableDto {
+
     private Long patientId;
     private String fullName;
-    private String birthDate;
-    private String relationship;
-    private String phone;
-    private String gender;
-    private String address;
     private String email;
+    private String phone;
+    private String relationship;
+    private String gender;
+    private boolean accountOwner;
+
+
 }

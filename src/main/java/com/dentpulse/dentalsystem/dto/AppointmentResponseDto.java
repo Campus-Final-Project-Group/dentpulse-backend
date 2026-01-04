@@ -11,4 +11,6 @@ public class AppointmentResponseDto {
     private String startTime;
     private String status;
     private String fullName;
+
+    private String type;
 }

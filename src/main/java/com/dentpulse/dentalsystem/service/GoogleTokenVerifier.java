@@ -63,4 +63,8 @@ public class GoogleTokenVerifier {
     public String getPicture(Map<String, Object> payload) {
         return (String) payload.get("picture");
     }
+
+    public String getGender(Map<String, Object> payload) {
+        return (String) payload.get("gender"); // Extract gender from the payload
+    }
 }

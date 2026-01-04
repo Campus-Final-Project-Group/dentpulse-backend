@@ -34,6 +34,8 @@ public class Patient {
     @Column(name = "relationship", length = 50)
     private String relationship;
 
+    @Column(name = "gender", length = 10)
+    private String gender;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

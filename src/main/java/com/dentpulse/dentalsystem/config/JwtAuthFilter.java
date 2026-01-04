@@ -27,7 +27,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/v1/auth/");
+
+        // ✅ Skip JWT filter for auth endpoints
+        if (path.startsWith("/api/v1/auth/")) {
+            return true;
+        }
+
+        // ✅ Skip JWT filter for AI recommendation endpoint
+//        if (path.equals("/api/appointments/ai-recommendation")) {
+//            return true;
+//        }
+        if (path.startsWith("/api/appointments/ai-recommendation")) { // ← ADD THIS LINE
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -61,6 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             } catch (Exception ignored) {}
         }
 
+        // ✅ Continue filter chain (important!)
         filterChain.doFilter(request, response);
     }
 }

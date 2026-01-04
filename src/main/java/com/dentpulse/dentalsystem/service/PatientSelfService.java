@@ -53,6 +53,7 @@ public class PatientSelfService {
         dto.setFullName(patient.getFullName());
         dto.setEmail(patient.getEmail());
         dto.setPhone(patient.getPhone());
+        dto.setGender(patient.getGender());
 
         dto.setBirthDate(patient.getDateOfBirth() != null ? patient.getDateOfBirth().toString() : null);
         dto.setAddress(patient.getAddress());
@@ -99,6 +100,7 @@ public class PatientSelfService {
         */
         // update patient-owned fields only
         patient.setFullName(req.getFullName());
+        patient.setGender(req.getGender());
         //patient.setPhone(req.getPhone());
 
 
@@ -148,6 +150,44 @@ public class PatientSelfService {
 
     }
 
+    public PatientProfileForTableDto getMyProfileFortabel(String token) {
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) throw new RuntimeException("User not found!");
+
+
+        //  Always get account owner patient
+        Patient patient = patientRepo
+                .findByUserIdAndAccountOwnerTrue(user.getId());
+
+        if (patient == null) {
+            throw new RuntimeException("Account owner patient not found!");
+        }
+        //List<Patient> patients = patientRepo.findAllByUserId(user.getId());
+
+        /*if (patients == null || patients.isEmpty()) {
+            throw new RuntimeException("No patient profile found for this user!");
+        }*/
+
+        //Patient patient = patients.get(0); // TEMPORARY: later we will choose by patientId
+
+        PatientProfileForTableDto dto = new PatientProfileForTableDto();
+        dto.setPatientId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setEmail(patient.getEmail());
+        dto.setPhone(patient.getPhone());
+        dto.setGender(patient.getGender());
+        dto.setAccountOwner(patient.isAccountOwner());
+        dto.setRelationship(
+                patient.isAccountOwner() ? "Account Owner" : patient.getRelationship()
+        );
+
+
+        return dto;
+    }
+
+
     public List<FamilyMemberDto> getMyFamilyMembers(String token) {
 
         String email = jwtUtil.extractEmail(token);
@@ -190,6 +230,7 @@ public class PatientSelfService {
             dto.setPhone(p.getPhone());
             dto.setRelationship(p.getRelationship());
             dto.setAccountOwner(p.isAccountOwner());
+            dto.setGender(p.getGender());
 
             result.add(dto);
         }
@@ -216,6 +257,7 @@ public class PatientSelfService {
         patient.setEmail(req.getEmail());
         patient.setPhone(req.getPhone());
         patient.setRelationship(req.getRelationship());
+        patient.setGender(req.getGender());
 
         patient.setAddress(req.getAddress());
         patient.setAccountOwner(false);
@@ -274,6 +316,7 @@ public class PatientSelfService {
         patient.setPhone(req.getPhone());
         patient.setEmail(req.getEmail());
         patient.setAddress(req.getAddress());
+        patient.setGender(req.getGender());
 
         if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
             patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
