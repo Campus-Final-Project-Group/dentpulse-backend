@@ -18,4 +18,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     // Get only family members (exclude account owner)
     List<Patient> findByUserIdAndAccountOwnerFalse(Long userId);
+
+    Optional<Patient> findById(Long patientId);
 }
