@@ -8,4 +8,8 @@ public class PatientListDto {
     private String fullName;
     private String birthDate;
     private String relationship;
+    private String phone;
+    private String gender;
+    private String address;
+    private String email;
 }

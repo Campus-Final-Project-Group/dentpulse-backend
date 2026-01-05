@@ -15,6 +15,8 @@ import java.util.Date;
 @AllArgsConstructor
 public class AppointmentDTO {
     private Long appointmentId;
+
+    private Long patientId;
     private String fullName;
     private LocalDate appointmentDate;
 
