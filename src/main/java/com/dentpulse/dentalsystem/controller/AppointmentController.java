@@ -70,4 +70,12 @@ public class AppointmentController {
         return appointmentService.getAppointmentStats();
     }
 
+    // ✅ ADMIN DASHBOARD – TODAY'S APPOINTMENTS
+    @GetMapping("/today")
+    public ResponseEntity<List<AppointmentResponseDto>> getTodayAppointments() {
+        return ResponseEntity.ok(
+                appointmentService.getTodayAppointments()
+        );
+    }
+
 }

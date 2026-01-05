@@ -260,5 +260,31 @@ public class AppointmentService {
                 new TypeToken<List<AppointmentDTO>>(){}.getType());
     }*/
 
+    public List<AppointmentResponseDto> getTodayAppointments() {
+
+        LocalDate today = LocalDate.now();
+
+        List<Appointment> appointments =
+                appointmentRepo.findByAppointmentDate(today);
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+
+            response.add(dto);
+        }
+
+        return response;
+    }
+
 
 }
