@@ -231,6 +231,8 @@ public class PatientSelfService {
             dto.setRelationship(p.getRelationship());
             dto.setAccountOwner(p.isAccountOwner());
             dto.setGender(p.getGender());
+            dto.setBirthDate(p.getDateOfBirth() != null ? p.getDateOfBirth().toString() : null);
+            dto.setAddress(p.getAddress());
 
             result.add(dto);
         }

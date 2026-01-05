@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 public class AuthService {
 
@@ -40,18 +42,51 @@ public class AuthService {
     // REGISTER PATIENT
     public UserDto registerPatient(RegisterPatientRequest dto) {
 
-        if (userRepo.existsByEmail(dto.getEmail())) {
+//        if (userRepo.existsByEmail(dto.getEmail())) {
+//            throw new RuntimeException("Email already exists!");
+//        }
+
+        User existing = userRepo.findByEmail(dto.getEmail());
+
+        if (existing != null && existing.isEmailVerified()) {
             throw new RuntimeException("Email already exists!");
         }
 
+
         // Save USER
-        User user = new User();
-        user.setUserName(dto.getFullName());
-        user.setEmail(dto.getEmail());
-        user.setContact(dto.getPhone());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(Role.PATIENT);
-        user.setGender(dto.getGender());
+//        User user = new User();
+//        user.setUserName(dto.getFullName());
+//        user.setEmail(dto.getEmail());
+//        user.setContact(dto.getPhone());
+//        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+//        user.setRole(Role.PATIENT);
+//        user.setGender(dto.getGender());
+
+        User user;
+
+        if (existing != null && !existing.isEmailVerified()) {
+            user = existing;
+
+            // Optional: update details if user re-registers
+            user.setUserName(dto.getFullName());
+            user.setContact(dto.getPhone());
+            user.setGender(dto.getGender());
+            user.setRole(Role.PATIENT);
+
+            // Update password too (optional)
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        } else {
+            // New user
+            user = new User();
+            user.setUserName(dto.getFullName());
+            user.setEmail(dto.getEmail());
+            user.setContact(dto.getPhone());
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            user.setRole(Role.PATIENT);
+            user.setGender(dto.getGender());
+        }
+
 
 
         //  OTP PART
@@ -62,9 +97,20 @@ public class AuthService {
 
         User savedUser = userRepo.save(user);
 
+        //  Send OTP email
+        emailService.sendOtpEmail(savedUser.getEmail(), otp);
+
         // Save PATIENT
-        Patient patient = new Patient();
-        patient.setUser(savedUser);
+//        Patient patient = new Patient();
+//        patient.setUser(savedUser);
+
+        Patient patient = patientRepo.findByUserIdAndAccountOwnerTrue(savedUser.getId());
+
+        if (patient == null) {
+            patient = new Patient();
+            patient.setUser(savedUser);
+            patient.setAccountOwner(true);
+        }
 
         //  copy identity data ONCE
         patient.setFullName(savedUser.getUserName());
@@ -81,8 +127,7 @@ public class AuthService {
 
         patientRepo.save(patient);
 
-        //  Send OTP email
-        emailService.sendOtpEmail(savedUser.getEmail(), otp);
+
 
         // Response DTO
         UserDto response = new UserDto();
@@ -129,6 +174,22 @@ public class AuthService {
 
         return "Email verified successfully.";
     }
+
+
+    public void resendVerifyOtp(String email) {
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) throw new RuntimeException("User not found!");
+        if (user.isEmailVerified()) throw new RuntimeException("Email already verified!");
+
+        String otp = generateOtp();
+        user.setOtpCode(otp);
+        user.setOtpExpiresAt(LocalDateTime.now().plusMinutes(10));
+
+        userRepo.save(user);
+        emailService.sendOtpEmail(user.getEmail(), otp);
+    }
+
 
 
     // LOGIN

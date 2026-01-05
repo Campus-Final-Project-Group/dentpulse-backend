@@ -10,5 +10,7 @@ public class FamilyMemberDto {
     private String phone;
     private String relationship;
     private String gender;
+    private String birthDate;
+    private String address;
     private boolean accountOwner;
 }
