@@ -11,4 +11,8 @@ public class PatientProfileDto {
     private String address;
     private String gender;
 
+
+
+
+
 }

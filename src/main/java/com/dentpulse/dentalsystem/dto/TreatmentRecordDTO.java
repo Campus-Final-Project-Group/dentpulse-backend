@@ -16,5 +16,9 @@ public class TreatmentRecordDTO {
     private Date treatment_date;       // correct name
     private String diagnosis;
     private String dentist_note;
+
+    /*new*/
+    //private String fullName;
+   // private Long Id;
 }
 

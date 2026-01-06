@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.controller;
 
+import com.dentpulse.dentalsystem.dto.AppointmentDTO;
 import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.TreatmentRecordDTO;
 import com.dentpulse.dentalsystem.service.TreatmentRecordService;
@@ -27,6 +28,21 @@ public class TreatmentRecordController {
 
         return treatmentRecordService.getRecordsByPatientId(patientId);
     }
+    /*new*/
+    @GetMapping("/patient/{patientId}/all")
+    public List<TreatmentRecordDTO> getAllRecordsByPatient(@PathVariable Long patientId) {
+        return treatmentRecordService.getAllTreatmentRecordsByPatient(patientId);
+    }
+    /*new*/
+    @GetMapping("/all")
+    public List<TreatmentRecordDTO> getAllRecords() {
+        return treatmentRecordService.getAllTreatmentRecords();
+    }
 
+//    @GetMapping
+//    public List<TreatmentRecordDTO> getRecords(){
+//
+//        return TreatmentRecordService.getAllRecords();
+//    }
 
 }
