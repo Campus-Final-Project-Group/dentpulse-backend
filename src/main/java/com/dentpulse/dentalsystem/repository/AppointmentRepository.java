@@ -85,4 +85,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     //Find Appointment according to the date
     List<Appointment> findByAppointmentDate(LocalDate appointmentDate);
 
+    // For table (all appointments)
+    List<Appointment> findAllByOrderByAppointmentDateDescStartTimeAsc();
+
 }
