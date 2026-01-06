@@ -28,6 +28,13 @@ public class AuthController {
         return ResponseEntity.ok(msg);
     }
 
+    @PostMapping("/resend-otp")
+    public ResponseEntity<String> resendOtp(@RequestBody ForgotPasswordRequest request) {
+        authService.resendVerifyOtp(request.getEmail());
+        return ResponseEntity.ok("OTP resent to your email");
+    }
+
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequest dto) {
