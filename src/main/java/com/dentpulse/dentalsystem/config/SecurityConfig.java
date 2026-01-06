@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,6 +17,7 @@ import org.springframework.web.cors.*;
 
 import java.util.List;
 
+@EnableMethodSecurity
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -41,7 +43,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -76,4 +78,28 @@ public class SecurityConfig {
             throws Exception {
         return config.getAuthenticationManager();
     }
+
+    //Add securityFilterChain
+    /*@Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+
+                        // PUBLIC AUTH
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+
+                        // ADMIN ONLY
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // ANY AUTHENTICATED USER
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        return http.build();
+    }*/
 }

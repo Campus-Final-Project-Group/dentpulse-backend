@@ -216,7 +216,7 @@ public class AuthService {
         userDto.setRole(user.getRole().name());
         userDto.setGender(user.getGender());
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
         return new LoginResponseDto(userDto, token);
     }
@@ -364,7 +364,7 @@ public class AuthService {
         userRepo.save(user);
 
         // 5. Generate JWT
-        String token = jwtUtil.generateToken(user.getEmail());
+        String token = jwtUtil.generateToken(user.getEmail(),user.getRole()); //Add user.getRole()
 
         // 6. Response
         UserDto userDto = new UserDto();
