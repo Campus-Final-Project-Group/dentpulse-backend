@@ -24,10 +24,10 @@ public class TestDentistDataLoader {
             }
 
             User user = new User();
-            user.setUserName("Dr Silva");
+            user.setUserName("Dr T.A.Sandalekha");
             user.setEmail("dentist@gmail.com");
-            user.setContact("0771234567");
-            user.setGender("MALE");
+            user.setContact("0715466337");
+            user.setGender("FEMALE");
 
             user.setPassword(passwordEncoder.encode("123456"));
             user.setRole(Role.DENTIST);
