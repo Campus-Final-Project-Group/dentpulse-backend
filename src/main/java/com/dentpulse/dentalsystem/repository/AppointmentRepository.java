@@ -88,4 +88,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // For table (all appointments)
     List<Appointment> findAllByOrderByAppointmentDateDescStartTimeAsc();
 
+    //Find Appointments by Patient Name
+    List<Appointment> findByPatientFullNameContainingIgnoreCase(String fullName);
+
 }
