@@ -36,4 +36,12 @@ public class AdminAppointmentController {
     public Map<String, Long> getStats() {
         return appointmentService.getAdminAppointmentStats();
     }
+
+    @GetMapping("/search")
+    public List<AppointmentResponseDto> searchAppointments(
+            @RequestParam String patientName
+    ) {
+        return appointmentService.searchByPatientName(patientName);
+    }
+
 }
