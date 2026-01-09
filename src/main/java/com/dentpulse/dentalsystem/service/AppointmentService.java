@@ -376,4 +376,37 @@ public class AppointmentService {
         return response;
     }*/
 
+    public List<AppointmentResponseDto> searchByPatientName(String patientName) {
+
+        List<Appointment> appointments =
+                appointmentRepo.findByPatientFullNameContainingIgnoreCase(patientName);
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+
+            // Convert LocalDate → String
+            dto.setAppointmentDate(
+                    appointment.getAppointmentDate().toString()
+            );
+
+            // Convert LocalTime → String
+            dto.setStartTime(
+                    appointment.getStartTime().toString()
+            );
+
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+
+            response.add(dto);
+        }
+
+        return response;
+    }
 }
