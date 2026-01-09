@@ -10,6 +10,7 @@ public class DentpulseBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DentpulseBackendApplication.class, args);
+		System.out.println("DentpulseBackendApplication started");
 	}
 	@Bean
 	public ModelMapper modelMapper(){
