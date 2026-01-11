@@ -372,4 +372,18 @@ public class PatientSelfService {
         return response;
     }
 
+    public List<Patient> searchPatients(String query) {
+        Long id = null;
+
+        try {
+            id = Long.parseLong(query);
+        } catch (Exception ignored) {}
+
+        return patientRepo
+                .findByIdOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContaining(
+                        id, query, query, query
+                );
+    }
+
+
 }

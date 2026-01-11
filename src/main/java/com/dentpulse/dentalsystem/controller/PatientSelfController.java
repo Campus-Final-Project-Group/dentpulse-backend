@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.controller;
 
 import com.dentpulse.dentalsystem.dto.*;
+import com.dentpulse.dentalsystem.entity.Patient;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -92,5 +93,12 @@ public class PatientSelfController {
 
         return ResponseEntity.ok(patientService.createPatientByAdmin(dto));
     }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Patient> searchPatients(@RequestParam String query) {
+        return patientService.searchPatients(query);
+    }
+
 
 }

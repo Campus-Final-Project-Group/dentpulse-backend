@@ -22,4 +22,12 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
 
     Optional<Patient> findById(Long patientId);
+
+    //find details for admin appointments
+    List<Patient> findByIdOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContaining(
+            Long id,
+            String fullName,
+            String email,
+            String phone
+    );
 }
