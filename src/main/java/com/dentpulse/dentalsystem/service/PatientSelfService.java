@@ -328,7 +328,48 @@ public class PatientSelfService {
     }
 
 
+    public PatientProfileResponseDto createPatientByAdmin(PatientProfileDto dto) {
+        Patient patient = new Patient();
 
+        patient.setFullName(dto.getFullName());
+        patient.setPhone(dto.getPhone());
+        patient.setGender(dto.getGender());
+        patient.setAddress(dto.getAddress());
 
+        // Optional email
+        patient.setEmail(dto.getEmail());
+
+        // Convert String → LocalDate
+        patient.setDateOfBirth(LocalDate.parse(dto.getBirthDate()));
+
+        // IMPORTANT PART 👇
+        patient.setUser(null);              // No user account
+        patient.setAccountOwner(false);     // Admin-created patient
+
+        Patient savedPatient = patientRepo.save(patient);
+
+        return mapToResponse(savedPatient);
+    }
+
+    private PatientProfileResponseDto mapToResponse(Patient patient) {
+
+        PatientProfileResponseDto response = new PatientProfileResponseDto();
+
+        response.setPatientId(patient.getId());
+        response.setFullName(patient.getFullName());
+        response.setEmail(patient.getEmail());
+        response.setPhone(patient.getPhone());
+        response.setDateOfBirth(
+                patient.getDateOfBirth() != null
+                        ? patient.getDateOfBirth().toString()
+                        : null
+        );
+        response.setAddress(patient.getAddress());
+
+        // Because this patient has NO user
+        response.setUserId(null);
+
+        return response;
+    }
 
 }

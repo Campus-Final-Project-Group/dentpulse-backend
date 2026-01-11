@@ -4,6 +4,7 @@ import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -84,6 +85,12 @@ public class PatientSelfController {
     }
 
 
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PatientProfileResponseDto> addPatient(
+            @RequestBody PatientProfileDto dto) {
 
+        return ResponseEntity.ok(patientService.createPatientByAdmin(dto));
+    }
 
 }
