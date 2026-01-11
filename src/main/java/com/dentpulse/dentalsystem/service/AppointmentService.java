@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.dentpulse.dentalsystem.entity.AppointmentStatus.*;
+
 
 @Service
 @Transactional
@@ -62,8 +64,8 @@ public class AppointmentService {
 
         status.put("total", appointmentRepo.count());
         status.put("scheduled", appointmentRepo.countByStatus(AppointmentStatus.SCHEDULED));
-        status.put("completed", appointmentRepo.countByStatus(AppointmentStatus.COMPLETED));
-        status.put("cancelled", appointmentRepo.countByStatus(AppointmentStatus.CANCELLED));
+        status.put("completed", appointmentRepo.countByStatus(COMPLETED));
+        status.put("cancelled", appointmentRepo.countByStatus(CANCELLED));
 
         return status;
     }
@@ -231,7 +233,7 @@ public class AppointmentService {
 
         // Step 4: Allow delete ONLY if PENDING or CANCELLED
         if (appointment.getStatus() != AppointmentStatus.PENDING &&
-                appointment.getStatus() != AppointmentStatus.CANCELLED) {
+                appointment.getStatus() != CANCELLED) {
 
             throw new RuntimeException(
                     "You can't delete this appointment. Please contact us."
@@ -260,5 +262,147 @@ public class AppointmentService {
                 new TypeToken<List<AppointmentDTO>>(){}.getType());
     }*/
 
+    public List<AppointmentResponseDto> getTodayAppointments() {
 
+        LocalDate today = LocalDate.now();
+
+        List<Appointment> appointments =
+                appointmentRepo.findByAppointmentDate(today);
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    public List<AppointmentResponseDto> getAllAppointmentsForAdmin() {
+
+        List<Appointment> appointments =
+                appointmentRepo.findAllByOrderByAppointmentDateDescStartTimeAsc();
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+    public List<AppointmentResponseDto> getAppointmentsByDate(LocalDate date) {
+
+        List<Appointment> appointments =
+                appointmentRepo.findByAppointmentDate(date);
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+            response.add(dto);
+        }
+
+        return response;
+    }
+
+
+    public Map<String, Long> getAdminAppointmentStats() {
+        Map<String, Long> stats = new HashMap<>();
+
+        stats.put("confirmed", appointmentRepo.countByStatus(CONFIRMED));
+        stats.put("scheduled",
+                appointmentRepo.countByStatus(PENDING)
+              + appointmentRepo.countByStatus(SCHEDULED)
+        );
+        stats.put("completed", appointmentRepo.countByStatus(COMPLETED));
+        stats.put("cancelled",
+                appointmentRepo.countByStatus(CANCELLED)
+              + appointmentRepo.countByStatus(NO_SHOW)
+        );
+
+        return stats;
+    }
+
+   /* public List<AppointmentResponseDto> getAllAppointmentsForAdmin() {
+
+        List<Appointment> appointments =
+                appointmentRepo.findAllByOrderByAppointmentDateDescStartTimeAsc();
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+            response.add(dto);
+        }
+
+        return response;
+    }*/
+
+    public List<AppointmentResponseDto> searchByPatientName(String patientName) {
+
+        List<Appointment> appointments =
+                appointmentRepo.findByPatientFullNameContainingIgnoreCase(patientName);
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+
+            // Convert LocalDate → String
+            dto.setAppointmentDate(
+                    appointment.getAppointmentDate().toString()
+            );
+
+            // Convert LocalTime → String
+            dto.setStartTime(
+                    appointment.getStartTime().toString()
+            );
+
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+
+            response.add(dto);
+        }
+
+        return response;
+    }
 }

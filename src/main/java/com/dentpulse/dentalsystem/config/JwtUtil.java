@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.config;
 
+import com.dentpulse.dentalsystem.entity.Role;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -24,7 +25,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateToken(String email) {
+    public String generateToken(String email, Role role) {//Add Role role
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())

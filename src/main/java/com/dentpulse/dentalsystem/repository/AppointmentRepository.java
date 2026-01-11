@@ -81,4 +81,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    //Find Appointment according to the date
+    List<Appointment> findByAppointmentDate(LocalDate appointmentDate);
+
+    // For table (all appointments)
+    List<Appointment> findAllByOrderByAppointmentDateDescStartTimeAsc();
+
+    //Find Appointments by Patient Name
+    List<Appointment> findByPatientFullNameContainingIgnoreCase(String fullName);
+
 }
