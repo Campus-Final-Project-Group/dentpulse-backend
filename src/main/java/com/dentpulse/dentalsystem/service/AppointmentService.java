@@ -336,16 +336,12 @@ public class AppointmentService {
     public Map<String, Long> getAdminAppointmentStats() {
         Map<String, Long> stats = new HashMap<>();
 
-        stats.put("total", appointmentRepo.count());
-
+        stats.put("confirmed", appointmentRepo.countByStatus(CONFIRMED));
         stats.put("scheduled",
                 appointmentRepo.countByStatus(PENDING)
-              + appointmentRepo.countByStatus(CONFIRMED)
               + appointmentRepo.countByStatus(SCHEDULED)
         );
-
         stats.put("completed", appointmentRepo.countByStatus(COMPLETED));
-
         stats.put("cancelled",
                 appointmentRepo.countByStatus(CANCELLED)
               + appointmentRepo.countByStatus(NO_SHOW)
