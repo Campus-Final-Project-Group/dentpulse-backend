@@ -6,28 +6,24 @@ import java.util.List;
 public class AdminDashboardSummaryDto {
 
     private long totalPatients;
-    private long totalAppointments;
+    private long todayAppointmentCount;
     private long inventoryItems;
-    private BigDecimal  totalRevenue;
+    private BigDecimal  todayRevenue;
 
-    // optional: today's appointments
-    private List<?> todayAppointments;
-
-    // getters and setters
-    public long getTotalPatients() {
-        return totalPatients;
+    public List<?> getTodayAppointments() {
+        return todayAppointments;
     }
 
-    public void setTotalPatients(long totalPatients) {
-        this.totalPatients = totalPatients;
+    public void setTodayAppointments(List<?> todayAppointments) {
+        this.todayAppointments = todayAppointments;
     }
 
-    public long getTotalAppointments() {
-        return totalAppointments;
+    public BigDecimal getTodayRevenue() {
+        return todayRevenue;
     }
 
-    public void setTotalAppointments(long totalAppointments) {
-        this.totalAppointments = totalAppointments;
+    public void setTodayRevenue(BigDecimal todayRevenue) {
+        this.todayRevenue = todayRevenue;
     }
 
     public long getInventoryItems() {
@@ -38,19 +34,23 @@ public class AdminDashboardSummaryDto {
         this.inventoryItems = inventoryItems;
     }
 
-    public BigDecimal getTotalRevenue() {
-        return totalRevenue;
+    public long getTodayAppointmentCount() {
+        return todayAppointmentCount;
     }
 
-    public void setTotalRevenue(BigDecimal  totalRevenue) {
-        this.totalRevenue = totalRevenue;
+    public void setTodayAppointmentCount(long todayAppointmentCount) {
+        this.todayAppointmentCount = todayAppointmentCount;
     }
 
-    public List<?> getTodayAppointments() {
-        return todayAppointments;
+    public long getTotalPatients() {
+        return totalPatients;
     }
 
-    public void setTodayAppointments(List<?> todayAppointments) {
-        this.todayAppointments = todayAppointments;
+    public void setTotalPatients(long totalPatients) {
+        this.totalPatients = totalPatients;
     }
+
+    // optional: today's appointments
+    private List<?> todayAppointments;
+
 }
