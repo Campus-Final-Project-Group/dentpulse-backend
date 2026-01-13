@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -268,7 +269,36 @@ public class PatientSelfService {
             patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
         }
 
-        // For now we store relationship later (Step 4.4 improvement)
+        //========================== new changes from sahan ===========
+        // Validate NIC rules
+        validatePatient(
+                req.getBirthDate(),
+                req.getHasNic(),
+                req.getNic()
+        );
+
+        // Prevent duplicates (only when no NIC/email)
+        checkDuplicateChild(
+                user,
+                req.getFullName().trim(),
+                LocalDate.parse(req.getBirthDate()),
+                req.getNic(),
+                req.getEmail()
+        );
+
+        // Set NIC definitively
+        if (Boolean.TRUE.equals(req.getHasNic())) {
+            patient.setNic(req.getNic());
+        } else {
+            patient.setNic(null);
+        }
+
+        if (req.getEmail() != null && req.getEmail().isBlank()) {
+            patient.setEmail(null);
+        }
+
+
+        //==================================================================
         patientRepo.save(patient);
     }
 
@@ -323,11 +353,29 @@ public class PatientSelfService {
         if (req.getBirthDate() != null && !req.getBirthDate().isBlank()) {
             patient.setDateOfBirth(LocalDate.parse(req.getBirthDate()));
         }
+        //========================== new changes from sahan ===========
+        validatePatient(
+                req.getBirthDate(),
+                req.getHasNic(),
+                req.getNic()
+        );
 
+        if (Boolean.TRUE.equals(req.getHasNic())) {
+            patient.setNic(req.getNic());
+        } else {
+            patient.setNic(null); // 🔐 force clean data
+        }
+
+        if (req.getEmail() != null && req.getEmail().isBlank()) {
+            patient.setEmail(null);
+        }
+
+
+        //==============================================================
         patientRepo.save(patient);
     }
 
-
+// =========== For Admin Module ============
     public PatientProfileResponseDto createPatientByAdmin(PatientProfileDto dto) {
         Patient patient = new Patient();
 
@@ -342,14 +390,101 @@ public class PatientSelfService {
         // Convert String → LocalDate
         patient.setDateOfBirth(LocalDate.parse(dto.getBirthDate()));
 
-        // IMPORTANT PART 👇
         patient.setUser(null);              // No user account
         patient.setAccountOwner(false);     // Admin-created patient
+
+        LocalDate dob = LocalDate.parse(dto.getBirthDate());
+
+        checkDuplicateAdminPatient(
+                dto.getFullName().trim(),
+                dob,
+                dto.getNic(),
+                dto.getEmail()
+        );
+
+        validatePatient(
+                dto.getBirthDate(),
+                dto.getHasNic(),
+                dto.getNic()
+        );
+
+        if (Boolean.TRUE.equals(dto.getHasNic())) {
+            patient.setNic(dto.getNic());
+        }else {
+            patient.setNic(null);
+        }
+
+        if (dto.getEmail() != null && dto.getEmail().isBlank()) {
+            patient.setEmail(null);
+        }
+
+
+
 
         Patient savedPatient = patientRepo.save(patient);
 
         return mapToResponse(savedPatient);
     }
+
+    public List<Patient> searchPatients(String query) {
+        Long id = null;
+
+        try {
+            id = Long.parseLong(query);
+        } catch (Exception ignored) {}
+
+        return patientRepo
+                .findByIdOrFullNameContainingIgnoreCaseOrEmailContainingIgnoreCaseOrPhoneContaining(
+                        id, query, query, query
+                );
+    }
+
+    public void validatePatient(String birthDate, Boolean hasNic, String nic) {
+
+        if (hasNic == null) {
+            throw new RuntimeException("Has NIC selection is required");
+        }
+
+        if (birthDate == null || birthDate.isBlank()) return;
+
+        int age = Period.between(
+                LocalDate.parse(birthDate),
+                LocalDate.now()
+        ).getYears();
+
+        // UNDER 16: hasNic must be FALSE
+        if (age < 16 && Boolean.TRUE.equals(hasNic)) {
+            throw new RuntimeException(
+                    "Patients under 16 years old cannot have NIC"
+            );
+        }
+
+        //UNDER 16: NIC must be empty
+        if (age < 16 && nic != null && !nic.isBlank()) {
+            throw new RuntimeException(
+                    "NIC is not allowed for patients under 16"
+            );
+        }
+
+        // Adult says NO NIC but still sends NIC
+        if (age >= 16 && Boolean.FALSE.equals(hasNic) && nic != null && !nic.isBlank()) {
+            throw new RuntimeException(
+                    "NIC must be empty when 'Has NIC' is set to No"
+            );
+        }
+
+        // Adult says YES NIC but NIC missing
+        if (age >= 16 && Boolean.TRUE.equals(hasNic)) {
+            if (nic == null || nic.isBlank()) {
+                throw new RuntimeException(
+                        "NIC is required when 'Has NIC' is set to Yes"
+                );
+            }
+        }
+    }
+
+
+
 
     private PatientProfileResponseDto mapToResponse(Patient patient) {
 
@@ -371,5 +506,81 @@ public class PatientSelfService {
 
         return response;
     }
+
+    private void checkDuplicateChild(
+            User user,
+            String fullName,
+            LocalDate dob,
+            String nic,
+            String email
+    ) {
+        //NIC has highest priority
+        if (nic != null && !nic.isBlank()) {
+            if (patientRepo.findByNic(nic).isPresent()) {
+                throw new RuntimeException("Patient already exists with this NIC");
+            }
+            return;
+        }
+
+        //Email has second priority
+        if (email != null && !email.isBlank()) {
+            if (patientRepo.findByEmail(email).isPresent()) {
+                throw new RuntimeException("Patient already exists with this email");
+            }
+            return;
+        }
+
+        //Fallback: Name + DOB + User
+        boolean exists = patientRepo
+                .findByUserIdAndFullNameIgnoreCaseAndDateOfBirth(
+                        user.getId(), fullName, dob
+                )
+                .isPresent();
+
+        if (exists) {
+            throw new RuntimeException(
+                    "This family member already exists (same name and date of birth)"
+            );
+        }
+    }
+
+
+    private void checkDuplicateAdminPatient(
+            String fullName,
+            LocalDate dob,
+            String nic,
+            String email
+    ) {
+        //NIC (global)
+        if (nic != null && !nic.isBlank()) {
+            if (patientRepo.findByNic(nic).isPresent()) {
+                throw new RuntimeException("Patient already exists with this NIC");
+            }
+            return;
+        }
+
+        //Email (global)
+        if (email != null && !email.isBlank()) {
+            if (patientRepo.findByEmail(email).isPresent()) {
+                throw new RuntimeException("Patient already exists with this email");
+            }
+            return;
+        }
+
+        //GLOBAL name + DOB
+        boolean exists = patientRepo
+                .findByFullNameIgnoreCaseAndDateOfBirth(fullName, dob)
+                .isPresent();
+
+        if (exists) {
+            throw new RuntimeException(
+                    "Patient already exists with same name and date of birth"
+            );
+        }
+    }
+
+
+
+
 
 }

@@ -11,4 +11,7 @@ public class UpdateFamilyMemberRequest {
     private String address;
     private String birthDate;
     private String gender;
+
+    private Boolean hasNic;   // from UI radio button
+    private String nic;
 }
