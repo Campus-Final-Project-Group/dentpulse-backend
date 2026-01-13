@@ -2,6 +2,7 @@ package com.dentpulse.dentalsystem.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.ArrayList;
@@ -12,7 +13,11 @@ import java.time.LocalDate;
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "patient")
+@Table(
+        name = "patient",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"full_name", "date_of_birth"})
+})
 public class Patient {
 
     @Id
@@ -26,10 +31,11 @@ public class Patient {
     @Column(name = "full_name", length = 100)
     private String fullName;
 
-    @Column(name = "email")
+    //Add unique=true and nullable=true
+    @Column(name = "email", unique = true, nullable = true)
     private String email;
 
-    @Column(name = "phone")
+    @Column(name = "phone",  nullable = true)
     private String phone;
 
     @Column(name = "relationship", length = 50)
@@ -58,4 +64,10 @@ public class Patient {
 
     @OneToMany(mappedBy = "patient")
     private List<TreatmentRecord> treatment_record;
+
+    //Add new field NIC
+    @Size(min = 10, max = 12, message = "NIC must be between 10 and 12 characters")
+    @Column(name = "nic", unique = true, nullable = true)
+    private String nic;
+
 }
