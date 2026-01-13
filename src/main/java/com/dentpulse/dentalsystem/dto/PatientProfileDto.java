@@ -11,4 +11,7 @@ public class PatientProfileDto {
     private String address;
     private String gender;
 
+    private Boolean hasNic;   // from UI radio button
+    private String nic;
+
 }

@@ -12,4 +12,7 @@ public class AddFamilyMemberRequest {
     private String birthDate; // yyyy-MM-dd
     private String address;
     private String gender;
+
+    private Boolean hasNic;   // from UI radio button
+    private String nic;
 }
