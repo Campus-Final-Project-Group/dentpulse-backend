@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 
 @Service
 public class AdminDashboardService {
@@ -36,16 +37,19 @@ public class AdminDashboardService {
         AdminDashboardSummaryDto dto = new AdminDashboardSummaryDto();
 
         dto.setTotalPatients(patientRepo.count());
-        dto.setTotalAppointments(appointmentRepo.count());
+
+        int todayCount = appointmentService.getTodayAppointments().size();
+        dto.setTodayAppointmentCount(todayCount);
+
         dto.setInventoryItems(medicineRepo.count());
 
-        Double revenue = invoiceRepo.getTotalRevenue();
+        Double todayRevenue = invoiceRepo.getTodayRevenue(LocalDate.now());
 
         BigDecimal formattedRevenue = BigDecimal
-                .valueOf(revenue != null ? revenue : 0)
+                .valueOf(todayRevenue != null ? todayRevenue : 0)
                 .setScale(2, RoundingMode.HALF_UP);
 
-        dto.setTotalRevenue(formattedRevenue);
+        dto.setTodayRevenue(formattedRevenue);
 
 
         dto.setTodayAppointments(
