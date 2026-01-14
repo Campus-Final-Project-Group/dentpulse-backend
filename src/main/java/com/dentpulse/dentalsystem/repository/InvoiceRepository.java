@@ -27,6 +27,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     """)
     Double getTodayRevenue(LocalDate today);
 
+    boolean existsByPatientId(Long patientId);
+
 }
 
 
