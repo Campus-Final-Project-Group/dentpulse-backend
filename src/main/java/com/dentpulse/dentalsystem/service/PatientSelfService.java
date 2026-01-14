@@ -3,8 +3,11 @@ package com.dentpulse.dentalsystem.service;
 import com.dentpulse.dentalsystem.config.JwtUtil;
 import com.dentpulse.dentalsystem.dto.*;
 import com.dentpulse.dentalsystem.entity.Patient;
+import com.dentpulse.dentalsystem.entity.TreatmentRecord;
 import com.dentpulse.dentalsystem.entity.User;
+import com.dentpulse.dentalsystem.repository.InvoiceRepository;
 import com.dentpulse.dentalsystem.repository.PatientRepository;
+import com.dentpulse.dentalsystem.repository.TreatmentRecordRepository;
 import com.dentpulse.dentalsystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,8 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.stream;
+
 @Service
 public class PatientSelfService {
 
@@ -22,6 +27,13 @@ public class PatientSelfService {
 
     @Autowired
     private PatientRepository patientRepo;
+
+    @Autowired
+    private TreatmentRecordRepository treatmentRecordRepo;
+
+    @Autowired
+    private InvoiceRepository invoiceRepo;
+
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -579,8 +591,86 @@ public class PatientSelfService {
         }
     }
 
+    public List<AdminPatientTableDto> getAllPatients() {
+        return patientRepo.findByActiveTrue()
+                .stream()
+                .map(this::mapToTableDTO)
+                .toList();
+    }
+
+    private AdminPatientTableDto mapToTableDTO(Patient patient) {
+        AdminPatientTableDto dto = new AdminPatientTableDto();
+        dto.setId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setGender(patient.getGender());
+        dto.setPhone(patient.getPhone());
+        dto.setActive(patient.isActive());
+
+        if (patient.getDateOfBirth() != null) {
+            dto.setAge(
+                    Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears()
+            );
+        }
+
+        return dto;
+    }
 
 
+    public AdminPatientProfileDto getPatientById(long id) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
 
+        AdminPatientProfileDto dto = new AdminPatientProfileDto();
+        dto.setId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setGender(patient.getGender());
+        dto.setPhone(patient.getPhone());
+        dto.setAddress(patient.getAddress());
+        dto.setNic(patient.getNic());
+        dto.setEmail(patient.getEmail());
 
+        if (patient.getDateOfBirth() != null) {
+            dto.setAge(
+                    Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears()
+            );
+        }
+
+        return dto;
+    }
+
+    // GET PATIENT TREATMENT HISTORY
+    // =====================================
+    public List<TreatmentRecordDTO> getPatientTreatmentHistory(Long patientId) {
+
+        // 1️⃣ Validate patient
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        // 2️⃣ Fetch treatment records
+        List<TreatmentRecord> records =
+                treatmentRecordRepo.findByPatientId(patient.getId());
+
+        // 3️⃣ Map entity → DTO (INLINE)
+        return records.stream().map(record -> {
+
+            TreatmentRecordDTO dto = new TreatmentRecordDTO();
+            dto.setTreatment_id(record.getTreatment_id());
+            dto.setPatient_id(record.getPatient().getId());
+            dto.setTreatment_date(record.getTreatment_date());
+            dto.setDiagnosis(record.getDiagnosis());
+            dto.setDentist_note(record.getDentist_note());
+
+            return dto;
+
+        }).toList();
+    }
+
+    public void deletePatient(Long patientId) {
+
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        patient.setActive(false);
+        patientRepo.save(patient);
+    }
 }

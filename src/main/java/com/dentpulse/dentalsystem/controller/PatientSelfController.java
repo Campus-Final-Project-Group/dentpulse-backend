@@ -100,5 +100,29 @@ public class PatientSelfController {
         return patientService.searchPatients(query);
     }
 
+    @GetMapping("/list-admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AdminPatientTableDto> getAllPatients() {
+        return patientService.getAllPatients();
+    }
+
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public AdminPatientProfileDto getPatientById(@PathVariable Long id){
+        return patientService.getPatientById(id);
+    }
+
+    @GetMapping("/admin/{id}/history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<TreatmentRecordDTO> getPatientHistory(@PathVariable Long id) {
+        return patientService.getPatientTreatmentHistory(id);
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
+        patientService.deletePatient(id);
+        return ResponseEntity.noContent().build(); // 204
+    }
 
 }
