@@ -48,5 +48,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     List<Patient> findByActiveTrue();
 
+    List<Patient> findByActiveFalse();
+
 
 }
