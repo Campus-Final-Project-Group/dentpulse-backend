@@ -62,7 +62,7 @@ public class AppointmentService {
 
         Map<String, Long> status = new HashMap<>();
 
-        status.put("total", appointmentRepo.count());
+        status.put("totalAppointments", appointmentRepo.count());
         status.put("scheduled", appointmentRepo.countByStatus(AppointmentStatus.SCHEDULED));
         status.put("completed", appointmentRepo.countByStatus(COMPLETED));
         status.put("cancelled", appointmentRepo.countByStatus(CANCELLED));
@@ -336,9 +336,9 @@ public class AppointmentService {
     public Map<String, Long> getAdminAppointmentStats() {
         Map<String, Long> stats = new HashMap<>();
 
-        stats.put("confirmed", appointmentRepo.countByStatus(CONFIRMED));
+        stats.put("total", appointmentRepo.count());
         stats.put("scheduled",
-                appointmentRepo.countByStatus(PENDING)
+                appointmentRepo.countByStatus(CONFIRMED)
               + appointmentRepo.countByStatus(SCHEDULED)
         );
         stats.put("completed", appointmentRepo.countByStatus(COMPLETED));

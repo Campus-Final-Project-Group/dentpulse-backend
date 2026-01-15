@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.dto;
 
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class PatientListDto {
@@ -12,4 +13,7 @@ public class PatientListDto {
     private String gender;
     private String address;
     private String email;
+
+    // ADD THIS
+    private List<TreatmentRecordDTO> treatmentRecords;
 }

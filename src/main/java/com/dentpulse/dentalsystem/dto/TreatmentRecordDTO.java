@@ -11,10 +11,15 @@ import java.util.Date;
 @AllArgsConstructor
 public class TreatmentRecordDTO {
 
-    private Integer treatment_id;      // for update
+    private Long treatment_id;      // for update
     private Long patient_id;           // FK
     private Date treatment_date;       // correct name
     private String diagnosis;
     private String dentist_note;
+
+    //NEW
+    private Long dentalServiceId;
+    private String dentalServiceName;
+    private Double dentalServicePrice;
 }
 

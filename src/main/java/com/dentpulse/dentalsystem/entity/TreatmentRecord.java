@@ -18,7 +18,7 @@ public class TreatmentRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "treatment_id")
-    private int treatment_id;
+    private Long treatment_id;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")   // column name in appointment table
@@ -38,7 +38,10 @@ public class TreatmentRecord {
     @Column(columnDefinition = "LONGBLOB")
     private byte[] attachment;
 
-
+    //Link to DentalService
+    @ManyToOne
+    @JoinColumn(name = "dental_service_id", nullable = false)
+    private DentalService dentalService;
 
 }
 
