@@ -591,7 +591,14 @@ public class PatientSelfService {
         }
     }
 
-    public List<AdminPatientTableDto> getAllPatients() {
+    public List<AdminPatientTableDto> getAllInactivePatients() {
+        return patientRepo.findByActiveFalse()
+                .stream()
+                .map(this::mapToTableDTO)
+                .toList();
+    }
+
+    public List<AdminPatientTableDto> getAllActivePatients() {
         return patientRepo.findByActiveTrue()
                 .stream()
                 .map(this::mapToTableDTO)
@@ -673,4 +680,35 @@ public class PatientSelfService {
         patient.setActive(false);
         patientRepo.save(patient);
     }
+
+    public void updatePatientStatus(Long patientId, boolean active) {
+
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        patient.setActive(active);
+        patientRepo.save(patient);
+    }
+
+
+    public void hardDeletePatient(Long patientId) {
+
+        Patient patient = patientRepo.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        if (patient.isActive()) {
+            throw new RuntimeException("Active patients cannot be deleted");
+        }
+
+        // ❌ BLOCK DELETE IF INVOICES EXIST
+        if (invoiceRepo.existsByPatientId(patientId)) {
+            throw new RuntimeException(
+                    "Cannot delete patient. Invoices exist for this patient."
+            );
+        }
+
+        patientRepo.delete(patient);
+    }
+
+
 }

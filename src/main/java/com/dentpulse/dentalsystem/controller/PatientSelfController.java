@@ -100,10 +100,16 @@ public class PatientSelfController {
         return patientService.searchPatients(query);
     }
 
-    @GetMapping("/list-admin")
+    @GetMapping("/admin/list/inactive")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminPatientTableDto> getAllPatients() {
-        return patientService.getAllPatients();
+        return patientService.getAllInactivePatients();
+    }
+
+    @GetMapping("/admin/list/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AdminPatientTableDto> getAllActivePatients() {
+        return patientService.getAllActivePatients();
     }
 
     @GetMapping("/admin/{id}")
@@ -118,11 +124,22 @@ public class PatientSelfController {
         return patientService.getPatientTreatmentHistory(id);
     }
 
-    @DeleteMapping("/admin/{id}")
+    @PutMapping("/admin/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deletePatient(@PathVariable Long id) {
-        patientService.deletePatient(id);
+    public ResponseEntity<Void> updatePatientStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active
+    ) {
+        patientService.updatePatientStatus(id, active);
         return ResponseEntity.noContent().build(); // 204
     }
+
+    @DeleteMapping("/admin/{id}/hard")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> hardDeletePatient(@PathVariable Long id) {
+        patientService.hardDeletePatient(id);
+        return ResponseEntity.noContent().build(); // 204
+    }
+
 
 }
