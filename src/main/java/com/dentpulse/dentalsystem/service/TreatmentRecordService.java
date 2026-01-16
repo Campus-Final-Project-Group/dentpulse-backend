@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Transactional
@@ -70,7 +72,8 @@ public class TreatmentRecordService {
                         record.getPatient().getId(),
                         record.getTreatment_date(),
                         record.getDiagnosis(),
-                        record.getDentist_note()
+                        record.getDentist_note(),
+                        record.getTreatmentType().name()
                 ))
                 .toList();
     }
@@ -83,9 +86,20 @@ public class TreatmentRecordService {
                         record.getPatient().getId(),
                         record.getTreatment_date(),
                         record.getDiagnosis(),
-                        record.getDentist_note()
+                        record.getDentist_note(),
+                        record.getTreatmentType().name()
                 ))
                 .toList();
+    }
+    /*new*/
+    public Map<String, Long> getTreatmentCharts() {
+        List<TreatmentRecord> allRecords = treatmentRecordRepo.findAll();
+
+        return allRecords.stream()
+                .collect(Collectors.groupingBy(
+                        record -> record.getTreatmentType().name(),
+                        Collectors.counting()
+                ));
     }
 
 
