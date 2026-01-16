@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 
@@ -45,4 +46,8 @@ public class TreatmentRecordController {
 //        return TreatmentRecordService.getAllRecords();
 //    }
 
+    @GetMapping("/treatment-stats")
+    public Map<String, Long> getTreatmentCharts() {
+        return treatmentRecordService.getTreatmentCharts();
+    }
 }
