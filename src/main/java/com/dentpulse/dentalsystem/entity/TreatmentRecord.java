@@ -38,6 +38,9 @@ public class TreatmentRecord {
     @Column(columnDefinition = "LONGBLOB")
     private byte[] attachment;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "treatment_type", nullable = false)
+    private TreatmentType treatmentType;
 
 
 }
