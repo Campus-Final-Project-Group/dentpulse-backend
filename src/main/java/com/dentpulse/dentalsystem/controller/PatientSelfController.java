@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.controller;
 
 import com.dentpulse.dentalsystem.dto.*;
+import com.dentpulse.dentalsystem.entity.Patient;
 import com.dentpulse.dentalsystem.service.PatientSelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -92,5 +93,53 @@ public class PatientSelfController {
 
         return ResponseEntity.ok(patientService.createPatientByAdmin(dto));
     }
+
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Patient> searchPatients(@RequestParam String query) {
+        return patientService.searchPatients(query);
+    }
+
+    @GetMapping("/admin/list/inactive")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AdminPatientTableDto> getAllPatients() {
+        return patientService.getAllInactivePatients();
+    }
+
+    @GetMapping("/admin/list/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<AdminPatientTableDto> getAllActivePatients() {
+        return patientService.getAllActivePatients();
+    }
+
+    @GetMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public AdminPatientProfileDto getPatientById(@PathVariable Long id){
+        return patientService.getPatientById(id);
+    }
+
+    @GetMapping("/admin/{id}/history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<TreatmentRecordDTO> getPatientHistory(@PathVariable Long id) {
+        return patientService.getPatientTreatmentHistory(id);
+    }
+
+    @PutMapping("/admin/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> updatePatientStatus(
+            @PathVariable Long id,
+            @RequestParam boolean active
+    ) {
+        patientService.updatePatientStatus(id, active);
+        return ResponseEntity.noContent().build(); // 204
+    }
+
+    @DeleteMapping("/admin/{id}/hard")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> hardDeletePatient(@PathVariable Long id) {
+        patientService.hardDeletePatient(id);
+        return ResponseEntity.noContent().build(); // 204
+    }
+
 
 }
