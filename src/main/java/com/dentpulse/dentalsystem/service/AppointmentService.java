@@ -51,11 +51,28 @@ public class AppointmentService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<AppointmentDTO> getAllAppointments() {
-        List<Appointment> appointmentList = appointmentRepo.findAll();
-        return modelMapper.map(appointmentList, new TypeToken<List<AppointmentDTO>>() {
-                }.getType()
-        );
+    public List<AppointmentResponseDto> getAllAppointments() {
+        List<Appointment> appointments =
+                appointmentRepo.findAll();
+
+        List<AppointmentResponseDto> response = new ArrayList<>();
+
+        for (Appointment appointment : appointments) {
+
+
+            AppointmentResponseDto dto = new AppointmentResponseDto();
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(appointment.getPatient().getId());
+            dto.setFullName(appointment.getPatient().getFullName());
+            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+            dto.setStartTime(appointment.getStartTime().toString());
+            dto.setStatus(appointment.getStatus().name());
+            dto.setType(appointment.getType());
+
+            response.add(dto);
+        }
+
+        return response;
     }
 
     public Map<String, Long> getAppointmentStats() {

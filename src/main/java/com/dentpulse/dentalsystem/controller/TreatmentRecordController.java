@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.controller;
 
+import com.dentpulse.dentalsystem.dto.AppointmentDTO;
 import com.dentpulse.dentalsystem.dto.PatientListDto;
 import com.dentpulse.dentalsystem.dto.TreatmentRecordDTO;
 import com.dentpulse.dentalsystem.service.TreatmentRecordService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 
@@ -27,6 +29,25 @@ public class TreatmentRecordController {
 
         return treatmentRecordService.getRecordsByPatientId(patientId);
     }
+    /*new*/
+    @GetMapping("/patient/{patientId}/all")
+    public List<TreatmentRecordDTO> getAllRecordsByPatient(@PathVariable Long patientId) {
+        return treatmentRecordService.getAllTreatmentRecordsByPatient(patientId);
+    }
+    /*new*/
+    @GetMapping("/all")
+    public List<TreatmentRecordDTO> getAllRecords() {
+        return treatmentRecordService.getAllTreatmentRecords();
+    }
 
+//    @GetMapping
+//    public List<TreatmentRecordDTO> getRecords(){
+//
+//        return TreatmentRecordService.getAllRecords();
+//    }
 
+    @GetMapping("/treatment-stats")
+    public Map<String, Long> getTreatmentCharts() {
+        return treatmentRecordService.getTreatmentCharts();
+    }
 }

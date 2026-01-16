@@ -16,5 +16,8 @@ public class TreatmentRecordDTO {
     private Date treatment_date;       // correct name
     private String diagnosis;
     private String dentist_note;
+    private String treatmentType;
+
 }
+
 
