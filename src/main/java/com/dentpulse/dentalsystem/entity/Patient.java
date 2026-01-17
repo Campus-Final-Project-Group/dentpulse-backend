@@ -73,4 +73,6 @@ public class Patient {
     @Column(name = "active" , nullable = false)
     private boolean active = true;
 
+
+
 }

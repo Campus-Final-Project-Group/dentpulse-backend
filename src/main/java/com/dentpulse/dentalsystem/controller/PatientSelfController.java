@@ -125,4 +125,9 @@ public class PatientSelfController {
         return ResponseEntity.noContent().build(); // 204
     }
 
+    @GetMapping("/{id}")
+    public PatientIdDto getPatientDetailsById(@PathVariable Long id){
+        return patientService.getPatientDetailsById(id);
+    }
+
 }
