@@ -60,7 +60,7 @@ public class AppointmentController {
     }
 
     @GetMapping
-    public List<AppointmentDTO> getAppointments(){
+    public List<AppointmentResponseDto> getAppointments(){
 
         return appointmentService.getAllAppointments();
     }

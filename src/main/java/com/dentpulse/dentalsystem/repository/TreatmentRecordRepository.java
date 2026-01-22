@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface TreatmentRecordRepository extends JpaRepository<TreatmentRecord, Long> {
     List<TreatmentRecord> findByPatientId(Long patientId);
-
+    // NEW - for treatment table view
+    List<TreatmentRecord> findAll();
 }
+
+
 
