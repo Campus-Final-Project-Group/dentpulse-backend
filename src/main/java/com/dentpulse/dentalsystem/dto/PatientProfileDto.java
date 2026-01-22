@@ -14,4 +14,5 @@ public class PatientProfileDto {
     private Boolean hasNic;   // from UI radio button
     private String nic;
 
+    private Long patientId;
 }

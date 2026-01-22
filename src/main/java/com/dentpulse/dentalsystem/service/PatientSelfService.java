@@ -70,6 +70,8 @@ public class PatientSelfService {
 
         dto.setBirthDate(patient.getDateOfBirth() != null ? patient.getDateOfBirth().toString() : null);
         dto.setAddress(patient.getAddress());
+        //Add patient ID
+        dto.setPatientId(patient.getId());
 
         return dto;
     }
@@ -681,6 +683,21 @@ public class PatientSelfService {
         patientRepo.save(patient);
     }
 
+
+    public PatientIdDto getPatientDetailsById(Long id) {
+        Patient patient = patientRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
+
+        PatientIdDto dto = new PatientIdDto();
+        dto.setId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setPhone(patient.getPhone());
+        dto.setAddress(patient.getAddress());
+        dto.setDob(patient.getDateOfBirth());
+        dto.setGender(patient.getGender());
+
+        return dto;
+    }
     public void updatePatientStatus(Long patientId, boolean active) {
 
         Patient patient = patientRepo.findById(patientId)
