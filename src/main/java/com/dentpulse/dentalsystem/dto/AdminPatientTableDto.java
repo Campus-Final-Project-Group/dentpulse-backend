@@ -13,5 +13,4 @@ public class AdminPatientTableDto {
     private Integer age;
     private String gender;
     private String phone;
-    private boolean isActive;
 }
