@@ -70,7 +70,4 @@ public class Patient {
     @Column(name = "nic", unique = true, nullable = true)
     private String nic;
 
-    @Column(name = "active" , nullable = false)
-    private boolean active = true;
-
 }
