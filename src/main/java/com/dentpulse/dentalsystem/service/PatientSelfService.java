@@ -70,6 +70,8 @@ public class PatientSelfService {
 
         dto.setBirthDate(patient.getDateOfBirth() != null ? patient.getDateOfBirth().toString() : null);
         dto.setAddress(patient.getAddress());
+        //Add patient ID
+        dto.setPatientId(patient.getId());
 
         return dto;
     }
