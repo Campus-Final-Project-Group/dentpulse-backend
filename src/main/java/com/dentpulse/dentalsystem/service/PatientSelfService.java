@@ -528,7 +528,7 @@ public class PatientSelfService {
             String nic,
             String email
     ) {
-        //NIC has highest priority
+        //NIC has the highest priority
         if (nic != null && !nic.isBlank()) {
             if (patientRepo.findByNic(nic).isPresent()) {
                 throw new RuntimeException("Patient already exists with this NIC");
@@ -593,19 +593,13 @@ public class PatientSelfService {
         }
     }
 
-    public List<AdminPatientTableDto> getAllInactivePatients() {
-        return patientRepo.findByActiveFalse()
+    public List<AdminPatientTableDto> getAllIPatients() {
+        return patientRepo.findAll()
                 .stream()
                 .map(this::mapToTableDTO)
                 .toList();
     }
 
-    public List<AdminPatientTableDto> getAllActivePatients() {
-        return patientRepo.findByActiveTrue()
-                .stream()
-                .map(this::mapToTableDTO)
-                .toList();
-    }
 
     private AdminPatientTableDto mapToTableDTO(Patient patient) {
         AdminPatientTableDto dto = new AdminPatientTableDto();
@@ -613,7 +607,7 @@ public class PatientSelfService {
         dto.setFullName(patient.getFullName());
         dto.setGender(patient.getGender());
         dto.setPhone(patient.getPhone());
-        dto.setActive(patient.isActive());
+        //dto.setActive(patient.isActive());
 
         if (patient.getDateOfBirth() != null) {
             dto.setAge(
@@ -651,15 +645,15 @@ public class PatientSelfService {
     // =====================================
     public List<TreatmentRecordDTO> getPatientTreatmentHistory(Long patientId) {
 
-        // 1️⃣ Validate patient
+        //Validate patient
         Patient patient = patientRepo.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        // 2️⃣ Fetch treatment records
+        //Fetch treatment records
         List<TreatmentRecord> records =
                 treatmentRecordRepo.findByPatientId(patient.getId());
 
-        // 3️⃣ Map entity → DTO (INLINE)
+        // Map entity → DTO (INLINE)
         return records.stream().map(record -> {
 
             TreatmentRecordDTO dto = new TreatmentRecordDTO();
@@ -673,59 +667,5 @@ public class PatientSelfService {
 
         }).toList();
     }
-
-    public void deletePatient(Long patientId) {
-
-        Patient patient = patientRepo.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-
-        patient.setActive(false);
-        patientRepo.save(patient);
-    }
-
-
-    public PatientIdDto getPatientDetailsById(Long id) {
-        Patient patient = patientRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
-
-        PatientIdDto dto = new PatientIdDto();
-        dto.setId(patient.getId());
-        dto.setFullName(patient.getFullName());
-        dto.setPhone(patient.getPhone());
-        dto.setAddress(patient.getAddress());
-        dto.setDob(patient.getDateOfBirth());
-        dto.setGender(patient.getGender());
-
-        return dto;
-    }
-    public void updatePatientStatus(Long patientId, boolean active) {
-
-        Patient patient = patientRepo.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-
-        patient.setActive(active);
-        patientRepo.save(patient);
-    }
-
-
-    public void hardDeletePatient(Long patientId) {
-
-        Patient patient = patientRepo.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
-
-        if (patient.isActive()) {
-            throw new RuntimeException("Active patients cannot be deleted");
-        }
-
-        // ❌ BLOCK DELETE IF INVOICES EXIST
-        if (invoiceRepo.existsByPatientId(patientId)) {
-            throw new RuntimeException(
-                    "Cannot delete patient. Invoices exist for this patient."
-            );
-        }
-
-        patientRepo.delete(patient);
-    }
-
 
 }

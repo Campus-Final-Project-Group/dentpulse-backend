@@ -46,9 +46,5 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             LocalDate dateOfBirth
     );
 
-    List<Patient> findByActiveTrue();
-
-    List<Patient> findByActiveFalse();
-
-
+    List<Patient> findAll();
 }
