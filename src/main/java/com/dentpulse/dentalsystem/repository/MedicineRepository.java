@@ -16,5 +16,10 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
     List<Medicine> findByMedicineStatus(MedicineStatus status);
 
     List<Medicine> findByMedicineNameContainingIgnoreCase(String name);
+
+    // ✅ NEW (for prescription dropdown)
+    List<Medicine> findByMedicineStatusIn(List<MedicineStatus> allowedStatuses);
+
+
 }
 

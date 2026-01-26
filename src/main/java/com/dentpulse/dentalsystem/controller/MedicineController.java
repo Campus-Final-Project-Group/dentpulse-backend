@@ -33,5 +33,12 @@ public class MedicineController {
     public List<MedicineDTO> search(@RequestParam String keyword) {
         return medicineService.searchMedicines(keyword);
     }
+
+    // 🔹 Dropdown medicines
+    // ✅ ONLY AVAILABLE + LIMITED
+    @GetMapping("/available")
+    public List<MedicineDTO> getAvailableMedicines() {
+        return medicineService.getAvailableMedicinesForPrescription();
+    }
 }
 
