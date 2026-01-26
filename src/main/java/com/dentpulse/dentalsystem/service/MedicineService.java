@@ -57,4 +57,21 @@ public class MedicineService {
                 new TypeToken<List<MedicineDTO>>() {}.getType()
         );
     }
+    // 🔹 Medicines for prescription dropdown
+    public List<MedicineDTO> getAvailableMedicinesForPrescription() {
+
+        List<MedicineStatus> allowedStatuses = List.of(
+                MedicineStatus.AVAILABLE,
+                MedicineStatus.LIMITED
+        );
+
+        List<Medicine> medicines =
+                medicineRepo.findByMedicineStatusIn(allowedStatuses);
+
+        return modelMapper.map(
+                medicines,
+                new TypeToken<List<MedicineDTO>>() {}.getType()
+        );
+    }
+
 }
