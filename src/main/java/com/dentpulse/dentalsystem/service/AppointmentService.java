@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
+import com.dentpulse.dentalsystem.dto.AppointmentDetailResponseDto;
 import com.dentpulse.dentalsystem.dto.AppointmentResponseDto;
 import com.dentpulse.dentalsystem.dto.CreateAppointmentRequest;
 
@@ -422,4 +423,26 @@ public class AppointmentService {
 
         return response;
     }
+
+    public AppointmentDetailResponseDto getAppointmentDetailsForAdmin(Long id) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        AppointmentDetailResponseDto dto = new AppointmentDetailResponseDto();
+
+        dto.setAppointmentId(appointment.getId());
+        dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+        dto.setStartTime(appointment.getStartTime().toString());
+
+        dto.setStatus(appointment.getStatus().name());
+        dto.setType(appointment.getType());
+
+        dto.setPatientId(appointment.getPatient().getId());
+        dto.setPatientName(appointment.getPatient().getFullName());
+        dto.setPatientPhone(appointment.getPatient().getPhone());
+
+        return dto;
+    }
+
 }
