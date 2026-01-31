@@ -1,6 +1,8 @@
 package com.dentpulse.dentalsystem.controller;
 
+import com.dentpulse.dentalsystem.dto.AppointmentDetailResponseDto;
 import com.dentpulse.dentalsystem.dto.AppointmentResponseDto;
+import com.dentpulse.dentalsystem.dto.AppointmentStatusUpdateDto;
 import com.dentpulse.dentalsystem.service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -42,6 +44,23 @@ public class AdminAppointmentController {
             @RequestParam String patientName
     ) {
         return appointmentService.searchByPatientName(patientName);
+    }
+
+    // View Appointment Details
+    @GetMapping("/{appointmentId}")
+    public AppointmentDetailResponseDto getAppointmentDetails(
+            @PathVariable Long appointmentId
+    ) {
+        return appointmentService.getAppointmentDetailsForAdmin(appointmentId);
+    }
+
+    //Update Appointment Status
+    @PutMapping("/{id}/status")
+    public void updateAppointmentStatus(
+            @PathVariable Long id,
+            @RequestBody AppointmentStatusUpdateDto dto
+    ) {
+        appointmentService.updateAppointmentStatus(id, dto.getStatus());
     }
 
 }

@@ -1,6 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
+import com.dentpulse.dentalsystem.dto.AppointmentDetailResponseDto;
 import com.dentpulse.dentalsystem.dto.AppointmentResponseDto;
 import com.dentpulse.dentalsystem.dto.CreateAppointmentRequest;
 
@@ -353,10 +354,11 @@ public class AppointmentService {
     public Map<String, Long> getAdminAppointmentStats() {
         Map<String, Long> stats = new HashMap<>();
 
-        stats.put("confirmed", appointmentRepo.countByStatus(CONFIRMED));
+        stats.put("total", appointmentRepo.count());
         stats.put("scheduled",
                 appointmentRepo.countByStatus(PENDING)
               + appointmentRepo.countByStatus(SCHEDULED)
+              + appointmentRepo.countByStatus(CONFIRMED)
         );
         stats.put("completed", appointmentRepo.countByStatus(COMPLETED));
         stats.put("cancelled",
@@ -422,4 +424,41 @@ public class AppointmentService {
 
         return response;
     }
+
+    public AppointmentDetailResponseDto getAppointmentDetailsForAdmin(Long id) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        AppointmentDetailResponseDto dto = new AppointmentDetailResponseDto();
+
+        dto.setAppointmentId(appointment.getId());
+        dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+        dto.setStartTime(appointment.getStartTime().toString());
+
+        dto.setStatus(appointment.getStatus().name());
+        dto.setType(appointment.getType());
+
+        dto.setPatientId(appointment.getPatient().getId());
+        dto.setPatientName(appointment.getPatient().getFullName());
+        dto.setPatientPhone(appointment.getPatient().getPhone());
+
+        return dto;
+    }
+
+    public void updateAppointmentStatus(Long id, String status) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        try {
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(status.toUpperCase());
+            appointment.setStatus(newStatus);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid appointment status");
+        }
+
+        appointmentRepo.save(appointment);
+    }
+
 }
