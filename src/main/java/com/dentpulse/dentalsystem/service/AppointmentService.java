@@ -446,4 +446,19 @@ public class AppointmentService {
         return dto;
     }
 
+    public void updateAppointmentStatus(Long id, String status) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        try {
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(status.toUpperCase());
+            appointment.setStatus(newStatus);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid appointment status");
+        }
+
+        appointmentRepo.save(appointment);
+    }
+
 }
