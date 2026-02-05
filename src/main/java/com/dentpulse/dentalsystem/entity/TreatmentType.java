@@ -7,7 +7,7 @@ public enum TreatmentType {
     WHITENING,
     IMPLANT,
     ROOT_CANAL,
-
-    OTHER
+    OTHER,
+    CHECKUP
 }
 
