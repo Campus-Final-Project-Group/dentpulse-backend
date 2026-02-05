@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.dto;
 
+import com.dentpulse.dentalsystem.entity.AppointmentType;
 import lombok.Data;
 
 @Data
@@ -9,7 +10,7 @@ public class AppointmentDetailResponseDto {
     private String startTime;
 
     private String status;
-    private String type;
+    private AppointmentType type;
 
     // Patient details
     private Long patientId;

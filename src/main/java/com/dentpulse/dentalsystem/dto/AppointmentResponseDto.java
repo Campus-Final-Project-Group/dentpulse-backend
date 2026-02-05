@@ -1,5 +1,6 @@
 package com.dentpulse.dentalsystem.dto;
 
+import com.dentpulse.dentalsystem.entity.AppointmentType;
 import lombok.Data;
 
 @Data
@@ -12,5 +13,5 @@ public class AppointmentResponseDto {
     private String status;
     private String fullName;
 
-    private String type;
+    private AppointmentType type;
 }
