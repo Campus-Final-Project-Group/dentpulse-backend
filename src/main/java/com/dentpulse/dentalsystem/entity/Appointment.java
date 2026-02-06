@@ -40,24 +40,35 @@ public class Appointment {
     private AppointmentStatus status;
 
     //  JUST STRING (admin will update later)
-    @Column(name = "type", nullable = false)
+    /*@Column(name = "type", nullable = false)
     private String type;
+    */
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AppointmentType appointmentType  = AppointmentType.NORMAL;
+
+    @Column(nullable = false)
+    private Integer durationMinutes = 30;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TreatmentType treatmentType = TreatmentType.CHECKUP;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-
-
     @PrePersist
     public void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (status == null) status = AppointmentStatus.PENDING;
-        if (type == null) {
-            type = "Checkup"; //  DEFAULT
-        }
+        if (appointmentType == null) appointmentType = AppointmentType.NORMAL;
+        if (durationMinutes == null) durationMinutes = 30;
+        if (treatmentType == null) treatmentType = TreatmentType.CHECKUP;
     }
 }
+

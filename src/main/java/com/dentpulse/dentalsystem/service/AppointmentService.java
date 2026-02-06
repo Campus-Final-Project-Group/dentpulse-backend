@@ -1,22 +1,22 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
+import com.dentpulse.dentalsystem.dto.AppointmentDetailResponseDto;
 import com.dentpulse.dentalsystem.dto.AppointmentResponseDto;
 import com.dentpulse.dentalsystem.dto.CreateAppointmentRequest;
 
 import com.dentpulse.dentalsystem.dto.AppointmentDTO;
-import com.dentpulse.dentalsystem.entity.Appointment;
-import com.dentpulse.dentalsystem.entity.AppointmentStatus;
-import com.dentpulse.dentalsystem.entity.Patient;
-import com.dentpulse.dentalsystem.entity.User;
+import com.dentpulse.dentalsystem.entity.*;
 import com.dentpulse.dentalsystem.repository.AppointmentRepository;
 import com.dentpulse.dentalsystem.repository.PatientRepository;
 import com.dentpulse.dentalsystem.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.time.LocalDate;
@@ -67,7 +67,7 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
 
             response.add(dto);
         }
@@ -156,7 +156,7 @@ public class AppointmentService {
         dto.setAppointmentDate(saved.getAppointmentDate().toString());
         dto.setStartTime(saved.getStartTime().toString());
         dto.setStatus(saved.getStatus().name());
-        dto.setType(saved.getType());
+        dto.setType(saved.getAppointmentType());
 
         return dto;
     }
@@ -222,7 +222,7 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
             appointmentDtos.add(dto);
 
         }
@@ -263,21 +263,6 @@ public class AppointmentService {
         appointmentRepo.delete(appointment);  // DELETE the appointment entirely from the database
     }
 
-    /*    public List<AppointmentDTO> getTodayAppointments() {
-        LocalDate today = LocalDate.now();
-
-        // Convert LocalDate → java.sql.Date
-        java.sql.Date sqlDate = java.sql.Date.valueOf(today);
-
-        // Convert java.sql.Date → java.util.Date  (MATCH ENTITY)
-        java.util.Date utilDate = new java.util.Date(sqlDate.getTime());
-
-        List<Appointment> appointments =
-                appointmentRepo.findByAppointment_dateOrderByStartTimeAsc(utilDate);
-
-        return modelMapper.map(appointments,
-                new TypeToken<List<AppointmentDTO>>(){}.getType());
-    }*/
 
     public List<AppointmentResponseDto> getTodayAppointments() {
 
@@ -297,7 +282,7 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
 
             response.add(dto);
         }
@@ -320,7 +305,7 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
             response.add(dto);
         }
 
@@ -342,7 +327,7 @@ public class AppointmentService {
             dto.setAppointmentDate(appointment.getAppointmentDate().toString());
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
             response.add(dto);
         }
 
@@ -353,10 +338,11 @@ public class AppointmentService {
     public Map<String, Long> getAdminAppointmentStats() {
         Map<String, Long> stats = new HashMap<>();
 
-        stats.put("confirmed", appointmentRepo.countByStatus(CONFIRMED));
+        stats.put("total", appointmentRepo.count());
         stats.put("scheduled",
                 appointmentRepo.countByStatus(PENDING)
               + appointmentRepo.countByStatus(SCHEDULED)
+              + appointmentRepo.countByStatus(CONFIRMED)
         );
         stats.put("completed", appointmentRepo.countByStatus(COMPLETED));
         stats.put("cancelled",
@@ -366,28 +352,6 @@ public class AppointmentService {
 
         return stats;
     }
-
-   /* public List<AppointmentResponseDto> getAllAppointmentsForAdmin() {
-
-        List<Appointment> appointments =
-                appointmentRepo.findAllByOrderByAppointmentDateDescStartTimeAsc();
-
-        List<AppointmentResponseDto> response = new ArrayList<>();
-
-        for (Appointment appointment : appointments) {
-            AppointmentResponseDto dto = new AppointmentResponseDto();
-            dto.setAppointmentId(appointment.getId());
-            dto.setPatientId(appointment.getPatient().getId());
-            dto.setFullName(appointment.getPatient().getFullName());
-            dto.setAppointmentDate(appointment.getAppointmentDate().toString());
-            dto.setStartTime(appointment.getStartTime().toString());
-            dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
-            response.add(dto);
-        }
-
-        return response;
-    }*/
 
     public List<AppointmentResponseDto> searchByPatientName(String patientName) {
 
@@ -415,11 +379,129 @@ public class AppointmentService {
             );
 
             dto.setStatus(appointment.getStatus().name());
-            dto.setType(appointment.getType());
+            dto.setType(appointment.getAppointmentType());
 
             response.add(dto);
         }
 
         return response;
+    }
+
+    public AppointmentDetailResponseDto getAppointmentDetailsForAdmin(Long id) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        AppointmentDetailResponseDto dto = new AppointmentDetailResponseDto();
+
+        dto.setAppointmentId(appointment.getId());
+        dto.setAppointmentDate(appointment.getAppointmentDate().toString());
+        dto.setStartTime(appointment.getStartTime().toString());
+
+        dto.setStatus(appointment.getStatus().name());
+        dto.setType(appointment.getAppointmentType());
+
+        dto.setPatientId(appointment.getPatient().getId());
+        dto.setPatientName(appointment.getPatient().getFullName());
+        dto.setPatientPhone(appointment.getPatient().getPhone());
+
+        return dto;
+    }
+
+    public void updateAppointmentStatus(Long id, String status) {
+
+        Appointment appointment = appointmentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        try {
+            AppointmentStatus newStatus = AppointmentStatus.valueOf(status.toUpperCase());
+            appointment.setStatus(newStatus);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid appointment status");
+        }
+
+        appointmentRepo.save(appointment);
+    }
+
+    public AppointmentResponseDto createAppointmentByAdmin(
+            CreateAppointmentRequest request
+    ) {
+
+        // 1. Get patient
+        Patient patient = patientRepo.findById(request.getPatientId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        // 2. Parse date & time
+        LocalDate date = LocalDate.parse(request.getAppointmentDate());
+        LocalTime time = LocalTime.parse(request.getStartTime());
+
+        // 3. Decide duration based on appointment type
+        int durationMinutes;
+
+        if (request.getAppointmentType() == AppointmentType.SPECIAL) {
+            durationMinutes = 120; // 2 hours
+        } else {
+            durationMinutes = 30; // normal checkup
+        }
+
+        LocalTime newStart = time;
+        LocalTime newEnd = time.plusMinutes(durationMinutes);
+
+        // 4. Slot blocking statuses
+        List<AppointmentStatus> blockingStatuses = List.of(
+                AppointmentStatus.PENDING,
+                AppointmentStatus.CONFIRMED,
+                AppointmentStatus.SCHEDULED
+        );
+
+        // 5. Get all blocking appointments for the same day
+        List<Appointment> sameDayAppointments =
+                appointmentRepo.findByAppointmentDateAndStatusIn(
+                        date,
+                        blockingStatuses
+                );
+
+        // 6. Overlap check (FIXED – dynamic duration)
+        for (Appointment existing : sameDayAppointments) {
+
+            LocalTime existingStart = existing.getStartTime();
+            LocalTime existingEnd =
+                    existingStart.plusMinutes(existing.getDurationMinutes());
+
+            boolean overlaps =
+                    newStart.isBefore(existingEnd)
+                            && newEnd.isAfter(existingStart);
+
+            if (overlaps) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "This time slot overlaps with an existing appointment"
+                );
+            }
+        }
+
+        // 7. Create appointment
+        Appointment appointment = new Appointment();
+        appointment.setPatient(patient);
+        appointment.setAppointmentDate(date);
+        appointment.setStartTime(time);
+        appointment.setAppointmentType(request.getAppointmentType());
+        appointment.setDurationMinutes(durationMinutes);
+        appointment.setTreatmentType(request.getTreatmentType()); // null for NORMAL
+        // status, createdAt handled by @PrePersist
+
+        Appointment saved = appointmentRepo.save(appointment);
+
+        // 8. Response DTO
+        AppointmentResponseDto dto = new AppointmentResponseDto();
+        dto.setAppointmentId(saved.getId());
+        dto.setPatientId(patient.getId());
+        dto.setFullName(patient.getFullName());
+        dto.setAppointmentDate(saved.getAppointmentDate().toString());
+        dto.setStartTime(saved.getStartTime().toString());
+        dto.setStatus(saved.getStatus().name());
+        dto.setType(saved.getAppointmentType());
+
+        return dto;
     }
 }
