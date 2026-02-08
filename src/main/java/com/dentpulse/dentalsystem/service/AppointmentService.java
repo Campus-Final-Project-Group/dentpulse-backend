@@ -404,6 +404,8 @@ public class AppointmentService {
         dto.setPatientId(appointment.getPatient().getId());
         dto.setPatientName(appointment.getPatient().getFullName());
         dto.setPatientPhone(appointment.getPatient().getPhone());
+        dto.setEmail(appointment.getPatient().getEmail());
+        dto.setAddress(appointment.getPatient().getAddress());
 
         return dto;
     }
