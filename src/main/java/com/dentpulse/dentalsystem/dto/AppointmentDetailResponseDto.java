@@ -16,5 +16,7 @@ public class AppointmentDetailResponseDto {
     private Long patientId;
     private String patientName;
     private String patientPhone;
+    private String email;
+    private String address;
 
 }
