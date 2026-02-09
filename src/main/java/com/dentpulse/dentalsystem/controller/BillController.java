@@ -4,10 +4,8 @@ import com.dentpulse.dentalsystem.dto.BillRequestDto;
 import com.dentpulse.dentalsystem.dto.BillResponseDto;
 import com.dentpulse.dentalsystem.service.BillService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -24,18 +22,10 @@ public class BillController {
         return billService.createBill(dto);
     }
 
-    // 📋 Table
-    @GetMapping("/table")
+    // 📋 Get ALL bills (no date)
+    @GetMapping
     public List<BillResponseDto> getAllBills() {
         return billService.getAllBills();
-    }
-
-    // 📅 Filter by date
-    @GetMapping
-    public List<BillResponseDto> getBillsByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
-    ) {
-        return billService.getBillsByDate(date);
     }
 
     // 🗑️ Delete
@@ -43,4 +33,13 @@ public class BillController {
     public void deleteBill(@PathVariable Long id) {
         billService.deleteBill(id);
     }
+    @PutMapping("/{id}")
+    public BillResponseDto updateBill(
+            @PathVariable Long id,
+            @RequestBody BillRequestDto dto
+    ) {
+        return billService.updateBill(id, dto);
+    }
+
+
 }

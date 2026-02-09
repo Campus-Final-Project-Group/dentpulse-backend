@@ -14,6 +14,7 @@ public class BillResponseDto {
     private String patientName;
     private String description;
     private Double amount;
+    private String status;
     private String paymentMethod;
     private String billDate;
 }

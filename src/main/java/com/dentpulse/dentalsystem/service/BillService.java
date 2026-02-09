@@ -7,9 +7,9 @@ import com.dentpulse.dentalsystem.repository.BillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class BillService {
 
     private final BillRepository billRepository;
 
-    // ➕ CREATE
+    // ➕ CREATE BILL (date allowed only here)
     public BillResponseDto createBill(BillRequestDto dto) {
         Bill bill = Bill.builder()
                 .billNumber("BILL-" + UUID.randomUUID().toString().substring(0, 8))
@@ -25,29 +25,39 @@ public class BillService {
                 .description(dto.getDescription())
                 .amount(dto.getAmount())
                 .billDate(dto.getBillDate())
+                .status("Unpaid")
                 .paymentMethod("Cash")
                 .build();
 
         return mapToDto(billRepository.save(bill));
     }
 
-    // 📋 TABLE
+    // 📋 GET ALL BILLS
     public List<BillResponseDto> getAllBills() {
         return billRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    // 📅 FILTER BY DATE
-    public List<BillResponseDto> getBillsByDate(LocalDate date) {
-        return billRepository.findByBillDate(date)
-                .stream()
-                .map(this::mapToDto)
-                .toList();
+    // ✏️ UPDATE BILL (NO DATE UPDATE)
+    public BillResponseDto updateBill(Long id, BillRequestDto dto) {
+        Bill bill = billRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+        bill.setPatientName(dto.getPatientName());
+        bill.setDescription(dto.getDescription());
+        bill.setAmount(dto.getAmount());
+
+        return mapToDto(billRepository.save(bill));
     }
 
-    // 🔁 MAPPER
+    // 🗑️ DELETE BILL
+    public void deleteBill(Long id) {
+        billRepository.deleteById(id);
+    }
+
+    // 🔁 MAPPER (single source of truth)
     private BillResponseDto mapToDto(Bill bill) {
         return new BillResponseDto(
                 bill.getId(),
@@ -55,16 +65,9 @@ public class BillService {
                 bill.getPatientName(),
                 bill.getDescription(),
                 bill.getAmount(),
+                bill.getStatus(),
                 bill.getPaymentMethod(),
                 bill.getBillDate().toString()
         );
     }
-    // 🗑️ DELETE BILL
-    public void deleteBill(Long id) {
-        if (!billRepository.existsById(id)) {
-            throw new RuntimeException("Bill not found with id: " + id);
-        }
-        billRepository.deleteById(id);
-    }
-
 }

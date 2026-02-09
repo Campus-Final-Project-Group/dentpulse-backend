@@ -18,7 +18,7 @@ public class Bill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String billNumber;
 
     @Column(nullable = false)
@@ -31,8 +31,9 @@ public class Bill {
     private Double amount;
 
     @Column(nullable = false)
+    private String status; // Paid / Unpaid
+
     private String paymentMethod; // Cash / Card
 
-    @Column(nullable = false)
     private LocalDate billDate;
 }
