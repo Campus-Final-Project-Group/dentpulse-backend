@@ -643,7 +643,7 @@ public class PatientSelfService {
 
     // GET PATIENT TREATMENT HISTORY
     // =====================================
-    public List<TreatmentRecordDTO> getPatientTreatmentHistory(Long patientId) {
+    public List<TreatmentRecordHistoryDTO> getPatientTreatmentHistory(Long patientId) {
 
         //Validate patient
         Patient patient = patientRepo.findById(patientId)
@@ -656,12 +656,17 @@ public class PatientSelfService {
         // Map entity → DTO (INLINE)
         return records.stream().map(record -> {
 
-            TreatmentRecordDTO dto = new TreatmentRecordDTO();
+            TreatmentRecordHistoryDTO dto = new TreatmentRecordHistoryDTO();
             dto.setTreatment_id(record.getTreatment_id());
             dto.setPatient_id(record.getPatient().getId());
             dto.setTreatment_date(record.getTreatment_date());
             dto.setDiagnosis(record.getDiagnosis());
             dto.setDentist_note(record.getDentist_note());
+
+            dto.setCost(record.getActualCost());
+            dto.setTreatment_service(record.getTreatmentService().getServiceName());
+            dto.setTreatmentType(record.getTreatmentType().name());
+
 
             return dto;
 

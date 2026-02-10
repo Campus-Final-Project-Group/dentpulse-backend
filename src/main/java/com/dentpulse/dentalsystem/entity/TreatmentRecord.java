@@ -42,6 +42,12 @@ public class TreatmentRecord {
     @Column(name = "treatment_type", nullable = false)
     private TreatmentType treatmentType;
 
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private TreatmentService treatmentService;
+
+    @Column(nullable = false)
+    private double actualCost;
 
 }
 
