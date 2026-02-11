@@ -116,7 +116,7 @@ public class TreatmentServiceDataLoader {
             int time,
             double cost
     ) {
-        if (!repo.existsByServiceName(name)) {
+        if (!repo.existsByDescription(name)) {
             TreatmentService service = new TreatmentService(
                     null,
                     type,

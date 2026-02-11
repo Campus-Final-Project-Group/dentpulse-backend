@@ -662,9 +662,6 @@ public class PatientSelfService {
             dto.setTreatment_date(record.getTreatment_date());
             dto.setDiagnosis(record.getDiagnosis());
             dto.setDentist_note(record.getDentist_note());
-
-            dto.setCost(record.getActualCost());
-            dto.setTreatment_service(record.getTreatmentService().getServiceName());
             dto.setTreatmentType(record.getTreatmentType().name());
 
 
