@@ -20,7 +20,7 @@ public class TreatmentService {
     private TreatmentType treatmentType;
 
     @Column(nullable = false, unique = true)
-    private String serviceName;
+    private String description;
     // e.g. "Extraction (Normal)", "Composite Filling"
 
     @Column(nullable = false)
