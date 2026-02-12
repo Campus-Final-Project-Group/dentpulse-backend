@@ -42,6 +42,5 @@ public class TreatmentRecord {
     @Column(name = "treatment_type", nullable = false)
     private TreatmentType treatmentType;
 
-
 }
 
