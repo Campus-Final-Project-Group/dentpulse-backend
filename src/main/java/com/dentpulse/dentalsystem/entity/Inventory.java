@@ -48,4 +48,5 @@ public class Inventory {
 
     @Column(name = "dosage")
     private String dosage; // New field for medicine dosage (e.g., 500mg)
+
 }
