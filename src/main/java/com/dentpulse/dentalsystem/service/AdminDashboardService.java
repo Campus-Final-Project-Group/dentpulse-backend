@@ -4,7 +4,8 @@ import com.dentpulse.dentalsystem.dto.AdminDashboardSummaryDto;
 import com.dentpulse.dentalsystem.repository.AppointmentRepository;
 import com.dentpulse.dentalsystem.repository.InvoiceRepository;
 import com.dentpulse.dentalsystem.repository.PatientRepository;
-import com.dentpulse.dentalsystem.repository.MedicineRepository;
+import com.dentpulse.dentalsystem.repository.MedicineRepository; // Kept for her
+import com.dentpulse.dentalsystem.repository.InventoryRepository; // Added for your card
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +23,10 @@ public class AdminDashboardService {
     private AppointmentRepository appointmentRepo;
 
     @Autowired
-    private MedicineRepository medicineRepo;
+    private MedicineRepository medicineRepo; // Kept so her logic doesn't break
+
+    @Autowired
+    private InventoryRepository inventoryRepo; // Added to fix your card
 
     @Autowired
     private AppointmentService appointmentService;
@@ -30,9 +34,7 @@ public class AdminDashboardService {
     @Autowired
     private InvoiceRepository invoiceRepo;
 
-
     public AdminDashboardSummaryDto getDashboardSummary() {
-
 
         AdminDashboardSummaryDto dto = new AdminDashboardSummaryDto();
 
@@ -41,7 +43,10 @@ public class AdminDashboardService {
         int todayCount = appointmentService.getTodayAppointments().size();
         dto.setTodayAppointmentCount(todayCount);
 
-        dto.setInventoryItems(medicineRepo.count());
+        // --- ONLY CHANGE IS HERE ---
+        // This makes YOUR card show the Inventory count.
+        dto.setInventoryItems(inventoryRepo.count());
+        // ---------------------------
 
         Double todayRevenue = invoiceRepo.getTodayRevenue(LocalDate.now());
 
@@ -50,7 +55,6 @@ public class AdminDashboardService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         dto.setTodayRevenue(formattedRevenue);
-
 
         dto.setTodayAppointments(
                 appointmentService.getTodayAppointments()

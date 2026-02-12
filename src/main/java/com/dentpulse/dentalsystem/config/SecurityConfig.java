@@ -27,31 +27,38 @@ public class SecurityConfig {
 
     // 🔹 MAIN SECURITY CONFIG
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ IMPORTANT
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // 1. Public endpoints
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/v3/api-docs/**"
+                                "/v3/api-docs/**",
+                                "/api/chat/**",
+                                "/api/**"
                         ).permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+
+                        // 2. SPECIFIC rule first (Move this UP)
+                        .requestMatchers("/api/v1/admin/inventory/**").permitAll()
+
+                        // 3. GENERAL admin rule second
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/chat").permitAll()
-                        .requestMatchers("/api/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     // 🔹 CORS CONFIG (THIS PART YOU ASKED ABOUT)
     @Bean
@@ -80,6 +87,7 @@ public class SecurityConfig {
             throws Exception {
         return config.getAuthenticationManager();
     }
+
 
     //Add securityFilterChain
     /*@Bean
