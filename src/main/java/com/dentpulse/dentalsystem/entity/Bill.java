@@ -22,12 +22,6 @@ public class Bill {
     private String billNumber;
 
     @Column(nullable = false)
-    private String patientName;
-
-    @Column(nullable = false)
-    private String description;
-
-    @Column(nullable = false)
     private Double amount;
 
     @Column(nullable = false)
@@ -36,4 +30,12 @@ public class Bill {
     private String paymentMethod; // Cash / Card
 
     private LocalDate billDate;
+
+    @ManyToOne
+    @JoinColumn(name = "treatment_service_id", nullable = false)
+    private TreatmentService treatmentService;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
 }
