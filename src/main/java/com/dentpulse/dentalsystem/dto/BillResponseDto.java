@@ -12,7 +12,7 @@ public class BillResponseDto {
     private Long id;
     private String billNumber;
     private String patientName;
-    private String description;
+    private String treatmentDescription;
     private Double amount;
     private String status;
     private String paymentMethod;
