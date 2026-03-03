@@ -134,4 +134,176 @@ public class ReviewService {
     }
 
 
+    //for patient update and delete
+
+    public ReviewResponseDto updateReview(String token, Long reviewId, CreateReviewRequest request) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Review review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // Ownership check
+        if (!review.getAppointment().getPatient().getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You cannot edit this review");
+        }
+
+        // Only PENDING can update
+        if (review.getStatus() != ReviewStatus.PENDING) {
+            throw new RuntimeException("Only pending reviews can be edited. Please contact clinic.");
+        }
+
+        review.setRating(request.getRating());
+        review.setComment(request.getComment());
+
+        Review updated = reviewRepo.save(review);
+
+        ReviewResponseDto dto = new ReviewResponseDto();
+        dto.setReviewId(updated.getId());
+        dto.setAppointmentId(updated.getAppointment().getId());
+        dto.setPatientId(updated.getAppointment().getPatient().getId());
+        dto.setPatientName(updated.getAppointment().getPatient().getFullName());
+        dto.setRating(updated.getRating());
+        dto.setComment(updated.getComment());
+        dto.setStatus(updated.getStatus());
+        dto.setCreatedAt(updated.getCreatedAt());
+
+        return dto;
+    }
+
+    public void deleteReview(String token, Long reviewId) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
+
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        Review review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // Ownership check
+        if (!review.getAppointment().getPatient().getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("You cannot delete this review");
+        }
+
+        // Only PENDING can delete
+        if (review.getStatus() != ReviewStatus.PENDING) {
+            throw new RuntimeException("Only pending reviews can be deleted. Please contact clinic.");
+        }
+
+        // 🔥 BREAK RELATIONSHIP FIRST
+        Appointment appointment = review.getAppointment();
+        appointment.setReview(null);
+
+
+        reviewRepo.delete(review);
+    }
+
+    //admin part__
+
+    public List<ReviewResponseDto> getPendingReviews() {
+
+        List<Review> reviews = reviewRepo.findByStatus(ReviewStatus.PENDING);
+
+        List<ReviewResponseDto> result = new ArrayList<>();
+
+        for (Review review : reviews) {
+
+            Appointment appointment = review.getAppointment();
+            Patient patient = appointment.getPatient();
+
+            ReviewResponseDto dto = new ReviewResponseDto();
+            dto.setReviewId(review.getId());
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(patient.getId());
+            dto.setPatientName(patient.getFullName());
+            dto.setRating(review.getRating());
+            dto.setComment(review.getComment());
+            dto.setStatus(review.getStatus());
+            dto.setCreatedAt(review.getCreatedAt());
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+    public void approveReview(Long reviewId) {
+
+        Review review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if (review.getStatus() != ReviewStatus.PENDING) {
+            throw new RuntimeException("Only pending reviews can be approved");
+        }
+
+        review.setStatus(ReviewStatus.APPROVED);
+        reviewRepo.save(review);
+    }
+
+    public void rejectReview(Long reviewId) {
+
+        Review review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        if (review.getStatus() != ReviewStatus.PENDING) {
+            throw new RuntimeException("Only pending reviews can be rejected");
+        }
+
+        review.setStatus(ReviewStatus.REJECTED);
+        reviewRepo.save(review);
+    }
+
+    public void removeReview(Long reviewId) {
+
+        Review review = reviewRepo.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        // Only APPROVED reviews can be removed
+        if (review.getStatus() != ReviewStatus.APPROVED) {
+            throw new RuntimeException("Only approved reviews can be removed");
+        }
+
+        review.setStatus(ReviewStatus.REMOVED);
+        reviewRepo.save(review);
+    }
+
+
+    //review -->public show
+    public List<ReviewResponseDto> getApprovedReviews() {
+
+        List<Review> reviews =
+                reviewRepo.findByStatusOrderByCreatedAtDesc(ReviewStatus.APPROVED);
+
+        List<ReviewResponseDto> result = new ArrayList<>();
+
+        for (Review review : reviews) {
+
+            Appointment appointment = review.getAppointment();
+            Patient patient = appointment.getPatient();
+
+            ReviewResponseDto dto = new ReviewResponseDto();
+            dto.setReviewId(review.getId());
+            dto.setAppointmentId(appointment.getId());
+            dto.setPatientId(patient.getId());
+            dto.setPatientName(patient.getFullName());
+            dto.setRating(review.getRating());
+            dto.setComment(review.getComment());
+            dto.setStatus(review.getStatus());
+            dto.setCreatedAt(review.getCreatedAt());
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
+
 }

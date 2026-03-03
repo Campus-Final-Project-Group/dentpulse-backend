@@ -2,6 +2,7 @@ package com.dentpulse.dentalsystem.entity;
 
 public enum ReviewStatus {
     PENDING,
-    APPROVED,
-    REJECTED
+    APPROVED, //visible
+    REJECTED, //never published
+    REMOVED   // admin removed after approval
 }
