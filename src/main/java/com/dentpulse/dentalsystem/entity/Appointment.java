@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -61,6 +62,9 @@ public class Appointment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private Review review;
 
     @PrePersist
     public void onCreate() {
