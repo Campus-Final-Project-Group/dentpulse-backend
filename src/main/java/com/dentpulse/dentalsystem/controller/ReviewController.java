@@ -68,29 +68,29 @@ public class ReviewController {
 
     //admin part___
 
-    @GetMapping("/admin/pending")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ReviewResponseDto>> getPendingReviews() {
-        return ResponseEntity.ok(
-                reviewService.getPendingReviews()
-        );
-    }
+//    @GetMapping("/admin/pending")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<List<ReviewResponseDto>> getPendingReviews() {
+//        return ResponseEntity.ok(
+//                reviewService.getPendingReviews()
+//        );
+//    }
 
     // ✅ Approve review
-    @PutMapping("/admin/{reviewId}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> approveReview(@PathVariable Long reviewId) {
-        reviewService.approveReview(reviewId);
-        return ResponseEntity.ok("Review approved successfully");
-    }
+//    @PutMapping("/admin/{reviewId}/approve")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<?> approveReview(@PathVariable Long reviewId) {
+//        reviewService.approveReview(reviewId);
+//        return ResponseEntity.ok("Review approved successfully");
+//    }
 
     // ❌ Reject review
-    @PutMapping("/admin/{reviewId}/reject")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> rejectReview(@PathVariable Long reviewId) {
-        reviewService.rejectReview(reviewId);
-        return ResponseEntity.ok("Review rejected successfully");
-    }
+//    @PutMapping("/admin/{reviewId}/reject")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<?> rejectReview(@PathVariable Long reviewId) {
+//        reviewService.rejectReview(reviewId);
+//        return ResponseEntity.ok("Review rejected successfully");
+//    }
 
     // 🔥 Remove approved review (soft delete)
     @PutMapping("/admin/{reviewId}/remove")

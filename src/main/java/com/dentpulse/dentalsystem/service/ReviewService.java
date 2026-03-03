@@ -72,7 +72,8 @@ public class ReviewService {
         review.setAppointment(appointment);
         review.setRating(request.getRating());
         review.setComment(request.getComment());
-        review.setStatus(ReviewStatus.PENDING);
+        //review.setStatus(ReviewStatus.PENDING);
+        review.setStatus(ReviewStatus.APPROVED); // immediate visible
 
         Review saved = reviewRepo.save(review);
 
@@ -154,8 +155,12 @@ public class ReviewService {
         }
 
         // Only PENDING can update
-        if (review.getStatus() != ReviewStatus.PENDING) {
-            throw new RuntimeException("Only pending reviews can be edited. Please contact clinic.");
+//        if (review.getStatus() != ReviewStatus.PENDING) {
+//            throw new RuntimeException("Only pending reviews can be edited. Please contact clinic.");
+//        }
+
+        if (review.getStatus() == ReviewStatus.REMOVED) {
+            throw new RuntimeException("Removed reviews cannot be edited.");
         }
 
         review.setRating(request.getRating());
@@ -194,8 +199,12 @@ public class ReviewService {
         }
 
         // Only PENDING can delete
-        if (review.getStatus() != ReviewStatus.PENDING) {
-            throw new RuntimeException("Only pending reviews can be deleted. Please contact clinic.");
+//        if (review.getStatus() != ReviewStatus.PENDING) {
+//            throw new RuntimeException("Only pending reviews can be deleted. Please contact clinic.");
+//        }
+
+        if (review.getStatus() == ReviewStatus.REMOVED) {
+            throw new RuntimeException("Removed reviews cannot be deleted.");
         }
 
         // 🔥 BREAK RELATIONSHIP FIRST
@@ -208,58 +217,58 @@ public class ReviewService {
 
     //admin part__
 
-    public List<ReviewResponseDto> getPendingReviews() {
+//    public List<ReviewResponseDto> getPendingReviews() {
+//
+//        List<Review> reviews = reviewRepo.findByStatus(ReviewStatus.PENDING);
+//
+//        List<ReviewResponseDto> result = new ArrayList<>();
+//
+//        for (Review review : reviews) {
+//
+//            Appointment appointment = review.getAppointment();
+//            Patient patient = appointment.getPatient();
+//
+//            ReviewResponseDto dto = new ReviewResponseDto();
+//            dto.setReviewId(review.getId());
+//            dto.setAppointmentId(appointment.getId());
+//            dto.setPatientId(patient.getId());
+//            dto.setPatientName(patient.getFullName());
+//            dto.setRating(review.getRating());
+//            dto.setComment(review.getComment());
+//            dto.setStatus(review.getStatus());
+//            dto.setCreatedAt(review.getCreatedAt());
+//
+//            result.add(dto);
+//        }
+//
+//        return result;
+//    }
 
-        List<Review> reviews = reviewRepo.findByStatus(ReviewStatus.PENDING);
+//    public void approveReview(Long reviewId) {
+//
+//        Review review = reviewRepo.findById(reviewId)
+//                .orElseThrow(() -> new RuntimeException("Review not found"));
+//
+//        if (review.getStatus() != ReviewStatus.PENDING) {
+//            throw new RuntimeException("Only pending reviews can be approved");
+//        }
+//
+//        review.setStatus(ReviewStatus.APPROVED);
+//        reviewRepo.save(review);
+//    }
 
-        List<ReviewResponseDto> result = new ArrayList<>();
-
-        for (Review review : reviews) {
-
-            Appointment appointment = review.getAppointment();
-            Patient patient = appointment.getPatient();
-
-            ReviewResponseDto dto = new ReviewResponseDto();
-            dto.setReviewId(review.getId());
-            dto.setAppointmentId(appointment.getId());
-            dto.setPatientId(patient.getId());
-            dto.setPatientName(patient.getFullName());
-            dto.setRating(review.getRating());
-            dto.setComment(review.getComment());
-            dto.setStatus(review.getStatus());
-            dto.setCreatedAt(review.getCreatedAt());
-
-            result.add(dto);
-        }
-
-        return result;
-    }
-
-    public void approveReview(Long reviewId) {
-
-        Review review = reviewRepo.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-
-        if (review.getStatus() != ReviewStatus.PENDING) {
-            throw new RuntimeException("Only pending reviews can be approved");
-        }
-
-        review.setStatus(ReviewStatus.APPROVED);
-        reviewRepo.save(review);
-    }
-
-    public void rejectReview(Long reviewId) {
-
-        Review review = reviewRepo.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
-
-        if (review.getStatus() != ReviewStatus.PENDING) {
-            throw new RuntimeException("Only pending reviews can be rejected");
-        }
-
-        review.setStatus(ReviewStatus.REJECTED);
-        reviewRepo.save(review);
-    }
+//    public void rejectReview(Long reviewId) {
+//
+//        Review review = reviewRepo.findById(reviewId)
+//                .orElseThrow(() -> new RuntimeException("Review not found"));
+//
+//        if (review.getStatus() != ReviewStatus.PENDING) {
+//            throw new RuntimeException("Only pending reviews can be rejected");
+//        }
+//
+//        review.setStatus(ReviewStatus.REJECTED);
+//        reviewRepo.save(review);
+//    }
 
     public void removeReview(Long reviewId) {
 
