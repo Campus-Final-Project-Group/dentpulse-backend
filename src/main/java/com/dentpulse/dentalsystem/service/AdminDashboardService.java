@@ -1,11 +1,7 @@
 package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.dto.AdminDashboardSummaryDto;
-import com.dentpulse.dentalsystem.repository.AppointmentRepository;
-import com.dentpulse.dentalsystem.repository.InvoiceRepository;
-import com.dentpulse.dentalsystem.repository.PatientRepository;
-import com.dentpulse.dentalsystem.repository.MedicineRepository; // Kept for her
-import com.dentpulse.dentalsystem.repository.InventoryRepository; // Added for your card
+import com.dentpulse.dentalsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +30,9 @@ public class AdminDashboardService {
     @Autowired
     private InvoiceRepository invoiceRepo;
 
+    @Autowired
+    private BillRepository billRepo;
+
     public AdminDashboardSummaryDto getDashboardSummary() {
 
         AdminDashboardSummaryDto dto = new AdminDashboardSummaryDto();
@@ -48,7 +47,7 @@ public class AdminDashboardService {
         dto.setInventoryItems(inventoryRepo.count());
         // ---------------------------
 
-        Double todayRevenue = invoiceRepo.getTodayRevenue(LocalDate.now());
+        Double todayRevenue = billRepo.getTodayRevenue(LocalDate.now());
 
         BigDecimal formattedRevenue = BigDecimal
                 .valueOf(todayRevenue != null ? todayRevenue : 0)
