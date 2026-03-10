@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,9 @@ public class AppointmentAvailabilityService {
 
         StringBuilder sb = new StringBuilder("📅 Available Time Slots\n\n");
 
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("h:mm a");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE (MMM dd)");
+
         LocalDate today = LocalDate.now();
 
         for (int i = 0; i < 3; i++) {
@@ -33,41 +37,48 @@ public class AppointmentAvailabilityService {
 
             List<LocalTime> allSlots;
 
+            // WEEKDAY NORMAL APPOINTMENTS
             if (day != DayOfWeek.SATURDAY && day != DayOfWeek.SUNDAY) {
 
-                // WEEKDAY NORMAL APPOINTMENT
                 allSlots = generateSlots(
-                        LocalTime.of(16,0),
-                        LocalTime.of(19,30),
+                        LocalTime.of(16, 0),
+                        LocalTime.of(19, 30),
                         30
                 );
 
-            } else {
+            }
+            // WEEKEND SPECIAL APPOINTMENTS
+            else {
 
-                // WEEKEND SPECIAL APPOINTMENT
                 allSlots = generateSlots(
-                        LocalTime.of(10,30),
-                        LocalTime.of(16,30),
+                        LocalTime.of(10, 30),
+                        LocalTime.of(16, 30),
                         120
                 );
             }
 
+            // GET APPOINTMENTS FROM DATABASE
             List<Appointment> appointments =
                     appointmentRepository.findByAppointmentDate(date);
 
-            List<LocalTime> booked =
-                    appointments.stream()
-                            .map(Appointment::getStartTime)
-                            .toList();
+            // FILTER BOOKED TIMES
+            List<LocalTime> bookedSlots = appointments.stream()
+                    .map(Appointment::getStartTime)
+                    .toList();
 
-            allSlots.removeAll(booked);
+            // REMOVE BOOKED FROM ALL
+            allSlots.removeAll(bookedSlots);
 
-            if (!allSlots.isEmpty()) {
+            sb.append(date.format(dateFormatter)).append("\n");
 
-                sb.append(date).append("\n");
+            if (allSlots.isEmpty()) {
+
+                sb.append("❌ No available slots\n\n");
+
+            } else {
 
                 for (LocalTime slot : allSlots) {
-                    sb.append("• ").append(slot).append("\n");
+                    sb.append("• ").append(slot.format(timeFormatter)).append("\n");
                 }
 
                 sb.append("\n");
