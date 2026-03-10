@@ -81,7 +81,7 @@ public class ChatController {
 
             chatSessionStore.setStage(sessionId, ChatStage.SHOW_TIME_SLOTS);
             return new ChatResponse(
-                    appointmentAvailabilityService.getAvailableSlotsNext7Days()
+                    appointmentAvailabilityService.getAvailableSlotsNext3Days()
             );
         }
 
