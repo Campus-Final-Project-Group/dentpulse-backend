@@ -47,16 +47,33 @@ public class ChatController {
         String msg = request.getMessage().toLowerCase();
         ChatStage stage = chatSessionStore.getStage(sessionId);
 
-        // 1️⃣ CLINIC INFO (TOP PRIORITY)
+        //RESET CHAT
+        if (msg.contains("restart") || msg.contains("start again") || msg.contains("reset")) {
+            chatSessionStore.clear(sessionId);
+            return new ChatResponse(
+                    "🔄 Chat restarted.\n\nHow can I help you today?"
+            );
+        }
+
+        //EMERGENCY DETECTION
+        if(msg.contains("bleeding") || msg.contains("swelling") || msg.contains("emergency")){
+            return new ChatResponse(
+                    "⚠️ This may be a dental emergency.\n\n" +
+                            "Please contact the clinic immediately.\n\n" +
+                            "📞 +94 71 546 6337"
+            );
+        }
+
+        //CLINIC INFO
         if (msg.contains("location") || msg.contains("where")) {
             return new ChatResponse(clinicInfoService.getClinicLocation());
         }
 
-        if (msg.contains("doctor")) {
+        if (msg.contains("doctor") || msg.contains("dentist")) {
             return new ChatResponse(clinicInfoService.getDoctors());
         }
 
-        if (msg.contains("open") || msg.contains("hours") || msg.contains("time")) {
+        if (msg.contains("open") || msg.contains("hours") || msg.contains("opening")) {
             return new ChatResponse(clinicInfoService.getOpeningHours());
         }
 
@@ -64,36 +81,50 @@ public class ChatController {
             return new ChatResponse(clinicInfoService.getServices());
         }
 
-        // 2️⃣ GREETINGS / THANK YOU
+        //GREETINGS
         if (isGreeting(msg)) {
             return greetingResponse();
         }
 
-        // 3️⃣ SERVICE → APPOINTMENT FLOW
+        if (isThankYou(msg)) {
+            return new ChatResponse("😊 You're welcome! Let me know if you need help.");
+        }
+
+
+
+        //SERVICE → APPOINTMENT FLOW
         if (isClinicService(msg) && stage == ChatStage.NORMAL) {
             chatSessionStore.setStage(sessionId, ChatStage.ASK_APPOINTMENT_CONFIRMATION);
             return appointmentPrompt();
         }
 
-        // 4️⃣ USER CONFIRMS
-        if (stage == ChatStage.ASK_APPOINTMENT_CONFIRMATION &&
-                (msg.equals("yes") || msg.equals("ok") || msg.contains("sure"))) {
+        //USER CONFIRMS
+        if (stage == ChatStage.ASK_APPOINTMENT_CONFIRMATION) {
 
-            chatSessionStore.setStage(sessionId, ChatStage.SHOW_TIME_SLOTS);
+            if (isConfirmation(msg)) {
+                chatSessionStore.setStage(sessionId, ChatStage.SHOW_TIME_SLOTS);
+                return new ChatResponse(
+                        appointmentAvailabilityService.getAvailableSlotsNext3Days()
+                );
+            }
+
+            chatSessionStore.setStage(sessionId, ChatStage.NORMAL);
+
             return new ChatResponse(
-                    appointmentAvailabilityService.getAvailableSlotsNext7Days()
+                    "No problem. Let me know if you need help with appointments or dental services."
             );
         }
 
-        // 5️⃣ OUTSIDE CLINIC SERVICES
-        if (!isClinicService(msg)) {
-            return outOfScopeResponse();
+        // AI FALLBACK
+        try {
+            return new ChatResponse(
+                    chatService.generateReply(systemPrompt, request.getMessage())
+            );
+        } catch (Exception e) {
+            return new ChatResponse(
+                    "I'm sorry, I couldn't process that question. Please ask about dental services or appointments."
+            );
         }
-
-        // 6️⃣ AI FALLBACK (SAFE GENERAL INFO)
-        return new ChatResponse(
-                chatService.generateReply(systemPrompt, request.getMessage())
-        );
     }
 
     // =========================
@@ -116,25 +147,38 @@ public class ChatController {
 
     private ChatResponse greetingResponse() {
         return new ChatResponse(
-                "😊 You're welcome! If you need help with dental services or appointments, feel free to ask."
+                "👋 Hello! I'm the DentPulse Assistant.\n\n" +
+                        "You can ask me about:\n" +
+                        "📍 Clinic location\n" +
+                        "👨‍⚕️ Doctors\n" +
+                        "⏰ Opening hours\n" +
+                        "🦷 Dental services\n" +
+                        "📅 Available appointments\n\n" +
+                        "How can I help you today?"
         );
     }
 
     private boolean isClinicService(String msg) {
-        return msg.contains("tooth") ||
+        return msg.contains("tooth pain") ||
+                msg.contains("toothache") ||
                 msg.contains("extraction") ||
                 msg.contains("filling") ||
                 msg.contains("root canal") ||
-                msg.contains("nerve") ||
                 msg.contains("scaling") ||
                 msg.contains("cleaning") ||
-                msg.contains("gum") ||
+                msg.contains("gum pain") ||
                 msg.contains("surgical");
     }
 
     private boolean isGreeting(String msg) {
-        return msg.matches(
-                ".*\\b(hi|hello|hey|good morning|good afternoon|good evening|thanks|thank you|ok|okay)\\b.*"
-        );
+        return msg.matches(".*\\b(hi|hello|hey|good morning|good afternoon|good evening)\\b.*");
+    }
+
+    private boolean isThankYou(String msg) {
+        return msg.matches(".*\\b(thanks|thank you|thankyou|thx)\\b.*");
+    }
+
+    private boolean isConfirmation(String msg) {
+        return msg.matches(".*\\b(yes|ok|okay|sure|yep)\\b.*");
     }
 }
