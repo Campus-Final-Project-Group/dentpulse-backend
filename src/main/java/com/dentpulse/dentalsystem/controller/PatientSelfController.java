@@ -114,7 +114,7 @@ public class PatientSelfController {
 
     @GetMapping("/admin/{id}/history")
     @PreAuthorize("hasRole('ADMIN')")
-    public List<TreatmentRecordDTO> getPatientHistory(@PathVariable Long id) {
+    public List<TreatmentRecordHistoryDTO> getPatientHistory(@PathVariable Long id) {
         return patientService.getPatientTreatmentHistory(id);
     }
 

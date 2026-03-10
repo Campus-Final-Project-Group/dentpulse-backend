@@ -2,13 +2,11 @@ package com.dentpulse.dentalsystem.service;
 
 import com.dentpulse.dentalsystem.config.JwtUtil;
 import com.dentpulse.dentalsystem.dto.*;
+import com.dentpulse.dentalsystem.entity.Bill;
 import com.dentpulse.dentalsystem.entity.Patient;
 import com.dentpulse.dentalsystem.entity.TreatmentRecord;
 import com.dentpulse.dentalsystem.entity.User;
-import com.dentpulse.dentalsystem.repository.InvoiceRepository;
-import com.dentpulse.dentalsystem.repository.PatientRepository;
-import com.dentpulse.dentalsystem.repository.TreatmentRecordRepository;
-import com.dentpulse.dentalsystem.repository.UserRepository;
+import com.dentpulse.dentalsystem.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +14,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.stream;
 
@@ -33,6 +32,9 @@ public class PatientSelfService {
 
     @Autowired
     private InvoiceRepository invoiceRepo;
+
+    @Autowired
+    private BillRepository billRepository;
 
 
     @Autowired
@@ -643,29 +645,48 @@ public class PatientSelfService {
 
     // GET PATIENT TREATMENT HISTORY
     // =====================================
-    public List<TreatmentRecordDTO> getPatientTreatmentHistory(Long patientId) {
+    public List<TreatmentRecordHistoryDTO> getPatientTreatmentHistory(Long patientId) {
 
-        //Validate patient
         Patient patient = patientRepo.findById(patientId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
-        //Fetch treatment records
         List<TreatmentRecord> records =
                 treatmentRecordRepo.findByPatientId(patient.getId());
 
-        // Map entity → DTO (INLINE)
         return records.stream().map(record -> {
 
-            TreatmentRecordDTO dto = new TreatmentRecordDTO();
+            TreatmentRecordHistoryDTO dto = new TreatmentRecordHistoryDTO();
+
             dto.setTreatment_id(record.getTreatment_id());
             dto.setPatient_id(record.getPatient().getId());
             dto.setTreatment_date(record.getTreatment_date());
             dto.setDiagnosis(record.getDiagnosis());
             dto.setDentist_note(record.getDentist_note());
 
+            Optional<Bill> billOptional =
+                    billRepository.findByPatientIdAndBillDate(
+                            patientId,
+                            record.getTreatment_date().toInstant()
+                                    .atZone(java.time.ZoneId.systemDefault())
+                                    .toLocalDate()
+                    );
+
+            if (billOptional.isPresent()) {
+
+                Bill bill = billOptional.get();
+
+                dto.setCost(bill.getAmount());
+                dto.setTreatment_service(bill.getTreatmentService().getDescription());
+
+            } else {
+                dto.setCost(0);
+                dto.setTreatment_service(null);
+            }
+
             return dto;
 
         }).toList();
     }
+
 
 }

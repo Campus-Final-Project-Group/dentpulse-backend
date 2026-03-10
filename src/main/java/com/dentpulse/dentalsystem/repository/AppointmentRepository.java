@@ -91,4 +91,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     //Find Appointments by Patient Name
     List<Appointment> findByPatientFullNameContainingIgnoreCase(String fullName);
 
+    //Find list for reviews
+    boolean existsByPatientIdAndStatusAndReviewIsNull(
+            Long patientId,
+            AppointmentStatus status
+    );
+
 }
