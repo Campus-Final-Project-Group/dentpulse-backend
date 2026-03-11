@@ -21,24 +21,23 @@ jobs:
           cache: maven
 
       - name: Build WAR file
-        # RAM ඉතිරි කර ගැනීමට සහ build එක speed කිරීමට threads සීමා කර ඇත
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Clean Old Deployment
+      - name: Stop and Deep Clean Tomcat
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Tomcat නවත්වන්න
+            # 1. Tomcat nawaththala iwara wenakan thappara 5k inna
             sudo systemctl stop tomcat || true
+            sleep 5
             
-            # පරණ war එක සහ folder එක සම්පූර්ණයෙන්ම අයින් කරන්න
+            # 2. Parana files saha CACHE okkoma ain karanna
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT* || true
-            
-            # Tomcat cache folders clean කරන්න
             sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend* || true
+            sudo rm -rf /opt/tomcat/temp/* || true
 
       - name: Deploy WAR to EC2
         uses: easingthemes/ssh-deploy@v5.1.0
@@ -50,24 +49,23 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start Tomcat and Verify
+      - name: Start and Force Sync
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Permissions නිවැරදි කරන්න
+            # 1. Permissions fix karanna
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             sudo chmod 644 /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             
-            # Tomcat නැවත පණගන්වන්න (මෙහිදී WAR එක auto-extract වේ)
+            # 2. Tomcat start karanna
             sudo systemctl start tomcat
             
-            # පද්ධතිය පණගැන්වෙන තෙක් තත්පර 15ක් රැඳී සිටින්න
-            echo "Waiting for Tomcat to extract the WAR file..."
-            sleep 15
+            # 3. WAR eka extract wenakan (Deep extract) thappara 20k inna
+            echo "Waiting for deep extraction..."
+            sleep 20
             
-            # සාර්ථකව extract වී ඇත්දැයි පරීක්ෂා කරන්න
-            ls -l /opt/tomcat/webapps/ | grep dentpulse
-            sudo systemctl status tomcat | grep Active
+            # 4. Extract wechcha folder eka thiyeda balanna
+            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "Folder not ready yet"
