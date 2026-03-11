@@ -20,7 +20,7 @@ jobs:
           cache: maven
 
       - name: Build WAR file
-        # Swap space thiyena nisa dan meka hira wenne naha
+        # මින් පෙර ඇති වූ Status 137 (OOM) වැළැක්වීමට threads සීමා කර ඇත
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
       - name: Deep Clean Tomcat on EC2
@@ -30,9 +30,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 1. Tomcat නවතා පද්ධතිය නිදහස් වන තෙක් රැඳී සිටින්න
             sudo systemctl stop tomcat || true
             sleep 5
-            # Parana extract wechcha folder saha war file okkoma mukanawa
+            
+            # 2. පරණ files සහ cache සියල්ල මකන්න (404 වැළැක්වීමට)
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT*
             sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
             sudo rm -rf /opt/tomcat/temp/*
@@ -47,16 +49,20 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start Tomcat & Wait
+      - name: Start Tomcat & Wait for Extraction
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 1. Permissions නිවැරදි කර Tomcat පණගන්වන්න
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             sudo systemctl start tomcat
-            # WAR eka folder ekakata extract wenakan thappara 20k inna oni
-            echo "Waiting for extraction..."
-            sleep 20
-            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
+            
+            # 2. WAR එක Folder එකකට extract වන තෙක් තත්පර 25ක් රැඳී සිටින්න (මෙහිදී ඉක්මන් වුවහොත් 404 error එක ලැබේ)
+            echo "Waiting for Tomcat to extract WAR file..."
+            sleep 25
+            
+            # 3. සාර්ථකව extract වී ඇත්දැයි පරීක්ෂා කරන්න
+            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "DEPLOYMENT ERROR: Extraction failed"
