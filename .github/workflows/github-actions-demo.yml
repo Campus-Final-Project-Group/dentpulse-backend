@@ -26,6 +26,18 @@ jobs:
       - name: Rename WAR to ROOT.war
         run: cp target/*.war target/ROOT.war
 
+      - name: Stop Tomcat and clean old app
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo bash /opt/tomcat/bin/shutdown.sh || true
+            sleep 5
+            sudo rm -rf /opt/tomcat/webapps/ROOT
+            sudo rm -f /opt/tomcat/webapps/ROOT.war
+
       - name: Deploy ROOT.war to EC2 Tomcat
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
@@ -36,14 +48,11 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Restart app manually with sudo
+      - name: Start Tomcat
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo rm -rf /opt/tomcat/webapps/ROOT
-            sudo bash /opt/tomcat/bin/shutdown.sh || true
-            sleep 5
             sudo bash /opt/tomcat/bin/startup.sh
