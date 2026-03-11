@@ -33,10 +33,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo bash /opt/tomcat/bin/shutdown.sh || true
-            sleep 5
+            # Tomcat nawathwala parana folder okkoma path karanna
+            sudo systemctl stop tomcat || true
             sudo rm -rf /opt/tomcat/webapps/ROOT
             sudo rm -f /opt/tomcat/webapps/ROOT.war
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
 
       - name: Deploy ROOT.war to EC2 Tomcat
         uses: easingthemes/ssh-deploy@v5.1.0
@@ -48,11 +49,14 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start Tomcat
+      - name: Start Tomcat & Fix Permissions
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo bash /opt/tomcat/bin/startup.sh
+            # ROOT.war eka tomcat user ta ayithi karanna
+            sudo chown tomcat:tomcat /opt/tomcat/webapps/ROOT.war
+            sudo chmod 644 /opt/tomcat/webapps/ROOT.war
+            sudo systemctl start tomcat
