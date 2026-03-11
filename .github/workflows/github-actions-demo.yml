@@ -2,67 +2,59 @@ name: Backend CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
-          cache: maven
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
 
-      - name: Build WAR file
-        # මින් පෙර ඇති වූ Status 137 (OOM) වැළැක්වීමට threads සීමා කර ඇත
+      - name: Build WAR
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Deep Clean Tomcat on EC2
+      - name: Hard Clean Tomcat
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Tomcat නවතා පද්ධතිය නිදහස් වන තෙක් රැඳී සිටින්න
             sudo systemctl stop tomcat || true
+            sudo pkill -9 -f tomcat || true
             sleep 5
-            
-            # 2. පරණ files සහ cache සියල්ල මකන්න (404 වැළැක්වීමට)
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT*
+            # Parana folders saha temp files okkoma ain karanna
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
             sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
             sudo rm -rf /opt/tomcat/temp/*
 
-      - name: Deploy New WAR
+      - name: Deploy WAR
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
-          SOURCE: target/dentpulse-backend-0.0.1-SNAPSHOT.war
-          TARGET: /opt/tomcat/webapps
-          ARGS: "-rlgoDzvc"
+          SOURCE: "target/dentpulse-backend-0.0.1-SNAPSHOT.war"
+          TARGET: "/opt/tomcat/webapps"
 
-      - name: Start Tomcat & Wait for Extraction
+      - name: Start and Verify
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Permissions නිවැරදි කර Tomcat පණගන්වන්න
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             sudo systemctl start tomcat
-            
-            # 2. WAR එක Folder එකකට extract වන තෙක් තත්පර 25ක් රැඳී සිටින්න (මෙහිදී ඉක්මන් වුවහොත් 404 error එක ලැබේ)
-            echo "Waiting for Tomcat to extract WAR file..."
-            sleep 25
-            
-            # 3. සාර්ථකව extract වී ඇත්දැයි පරීක්ෂා කරන්න
-            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "DEPLOYMENT ERROR: Extraction failed"
+            # WAR එක extract වී API එක පණ ගැන්වෙන තෙක් කාලය ලබා දෙන්න
+            echo "Waiting 40 seconds for full deployment..."
+            sleep 40
+            # සාර්ථකව extract වී ඇත්දැයි පරීක්ෂාව
+            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "FAILED: Extraction not finished"
