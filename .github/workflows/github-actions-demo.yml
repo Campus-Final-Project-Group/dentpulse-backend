@@ -8,7 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -21,25 +20,24 @@ jobs:
           cache: maven
 
       - name: Build WAR file
+        # Swap space thiyena nisa dan meka hira wenne naha
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Stop and Deep Clean Tomcat
+      - name: Deep Clean Tomcat on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Tomcat nawaththala iwara wenakan thappara 5k inna
             sudo systemctl stop tomcat || true
             sleep 5
-            
-            # 2. Parana files saha CACHE okkoma ain karanna
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT* || true
-            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend* || true
-            sudo rm -rf /opt/tomcat/temp/* || true
+            # Parana extract wechcha folder saha war file okkoma mukanawa
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT*
+            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
+            sudo rm -rf /opt/tomcat/temp/*
 
-      - name: Deploy WAR to EC2
+      - name: Deploy New WAR
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -49,23 +47,16 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start and Force Sync
+      - name: Start Tomcat & Wait
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Permissions fix karanna
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
-            sudo chmod 644 /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
-            
-            # 2. Tomcat start karanna
             sudo systemctl start tomcat
-            
-            # 3. WAR eka extract wenakan (Deep extract) thappara 20k inna
-            echo "Waiting for deep extraction..."
+            # WAR eka folder ekakata extract wenakan thappara 20k inna oni
+            echo "Waiting for extraction..."
             sleep 20
-            
-            # 4. Extract wechcha folder eka thiyeda balanna
-            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "Folder not ready yet"
+            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
