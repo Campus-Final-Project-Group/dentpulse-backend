@@ -33,11 +33,14 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Restart Tomcat
+      - name: Restart app manually
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo systemctl restart tomcat
+            cd /opt/tomcat/bin
+            ./shutdown.sh || true
+            sleep 5
+            ./startup.sh
