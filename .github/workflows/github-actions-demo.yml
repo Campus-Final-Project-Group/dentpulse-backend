@@ -18,24 +18,31 @@ jobs:
           cache: 'maven'
 
       - name: Build WAR
+        # RAM ගැටලු මඟහරවා ගැනීමට threads සීමා කර ඇත
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Hard Clean Tomcat
+      - name: Safe Clean & Deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # 1. RAM එක නිදහස් කිරීමට Tomcat නවත්වා තත්පර 10ක් ඉන්න
             sudo systemctl stop tomcat || true
-            sudo pkill -9 -f tomcat || true
-            sleep 5
-            # Parana folders saha temp files okkoma ain karanna
+            sleep 10
+            
+            # 2. පරණ folders එකින් එක මකන්න (එකවර මැකීම RAM එකට බරකි)
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
+            sleep 2
             sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
+            sleep 2
             sudo rm -rf /opt/tomcat/temp/*
+            
+            # 3. RAM එක පිරිසිදු කිරීමට cache එක flush කරන්න
+            sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-      - name: Deploy WAR
+      - name: Transfer WAR
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -44,7 +51,7 @@ jobs:
           SOURCE: "target/dentpulse-backend-0.0.1-SNAPSHOT.war"
           TARGET: "/opt/tomcat/webapps"
 
-      - name: Start and Verify
+      - name: Start & Health Check
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -53,8 +60,8 @@ jobs:
           script: |
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             sudo systemctl start tomcat
-            # WAR එක extract වී API එක පණ ගැන්වෙන තෙක් කාලය ලබා දෙන්න
-            echo "Waiting 40 seconds for full deployment..."
-            sleep 40
-            # සාර්ථකව extract වී ඇත්දැයි පරීක්ෂාව
-            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "FAILED: Extraction not finished"
+            # පද්ධතිය පණ ගැන්වෙන තෙක් තත්පර 45ක් රැඳී සිටින්න
+            echo "Waiting for app to extract and start..."
+            sleep 45
+            # API එක වැඩදැයි පරීක්ෂා කිරීම
+            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "Deployment check failed"
