@@ -56,7 +56,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "http://localhost:5173",
                 "https://www.dentpulseclinic.com",
-                "https://dentpulseclinic.com"
+                "https://dentpulseclinic.com",
                 "https://api.dentpulseclinic.com"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
