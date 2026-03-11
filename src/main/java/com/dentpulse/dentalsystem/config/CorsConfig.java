@@ -14,7 +14,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000")  // React Vite frontend
+                        .allowedOrigins("http://localhost:3000","http://www.dentpulseclinic.com", "https://www.dentpulseclinic.com")  // React Vite frontend
                         .allowedOriginPatterns("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*");
