@@ -23,9 +23,6 @@ jobs:
       - name: Build WAR file
         run: mvn clean package -DskipTests
 
-      - name: Rename WAR to ROOT.war
-        run: cp target/*.war target/ROOT.war
-
       - name: Stop Tomcat and clean old app
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -33,47 +30,36 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Stop Tomcat and kill any stuck processes
+            # 1. Stop Tomcat
             sudo systemctl stop tomcat || true
-            sudo pkill -9 -f tomcat || true
             
-            # 2. Clean old files
-            sudo rm -rf /opt/tomcat/webapps/ROOT
-            sudo rm -f /opt/tomcat/webapps/ROOT.war
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
-            sudo rm -f /opt/tomcat/temp/tomcat.pid || true
+            # 2. Parana files okkoma path karanna
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
+            sudo rm -f /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
 
-      - name: Deploy ROOT.war to EC2 Tomcat
+      - name: Deploy WAR to EC2 Tomcat
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
-          SOURCE: target/ROOT.war
+          # Target eke thiyena original war eka kelinma gannawa
+          SOURCE: target/dentpulse-backend-0.0.1-SNAPSHOT.war
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Extract WAR and Fix Permissions
+      - name: Fix Permissions and Start Tomcat
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. Unzip tool eka install karanna (nathi nam)
-            sudo apt-get update && sudo apt-get install -y unzip
-
-            # 2. Manual unzip ROOT.war into ROOT folder
-            sudo mkdir -p /opt/tomcat/webapps/ROOT
-            sudo unzip -o /opt/tomcat/webapps/ROOT.war -d /opt/tomcat/webapps/ROOT
-
-            # 3. Ownership and Permissions (Wadagathma kalla)
-            sudo chown -R tomcat:tomcat /opt/tomcat/webapps/ROOT
-            sudo chown tomcat:tomcat /opt/tomcat/webapps/ROOT.war
-            sudo chmod -R 755 /opt/tomcat/webapps/ROOT
+            # 1. File ownership hariyata hadanna
+            sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
+            sudo chmod 644 /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             
-            # 4. Start Tomcat
-            sudo systemctl daemon-reload
+            # 2. Tomcat start karanna. Start weddi Tomcat eka auto-unzip karagani
             sudo systemctl start tomcat
 
       - name: Verify Deployment
@@ -83,6 +69,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Checking if ROOT folder exists..."
+            echo "Waiting for Tomcat to extract the WAR file..."
+            sleep 10
             ls -l /opt/tomcat/webapps/
             sudo systemctl status tomcat | grep Active
