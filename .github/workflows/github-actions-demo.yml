@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -20,23 +21,26 @@ jobs:
           cache: maven
 
       - name: Build WAR file
-        run: mvn clean package -DskipTests
+        # RAM ඉතිරි කර ගැනීමට සහ build එක speed කිරීමට threads සීමා කර ඇත
+        run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Hard Clean Tomcat
+      - name: Clean Old Deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Tomcat නවත්වන්න
             sudo systemctl stop tomcat || true
-            sudo pkill -9 -f tomcat || true
-            # Parana folders saha temp files okkoma ain karanna
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
-            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
-            sudo rm -rf /opt/tomcat/temp/*
+            
+            # පරණ war එක සහ folder එක සම්පූර්ණයෙන්ම අයින් කරන්න
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT* || true
+            
+            # Tomcat cache folders clean කරන්න
+            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend* || true
 
-      - name: Deploy WAR
+      - name: Deploy WAR to EC2
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -46,14 +50,24 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start and Verify
+      - name: Start Tomcat and Verify
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Permissions නිවැරදි කරන්න
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
+            sudo chmod 644 /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
+            
+            # Tomcat නැවත පණගන්වන්න (මෙහිදී WAR එක auto-extract වේ)
             sudo systemctl start tomcat
+            
+            # පද්ධතිය පණගැන්වෙන තෙක් තත්පර 15ක් රැඳී සිටින්න
+            echo "Waiting for Tomcat to extract the WAR file..."
             sleep 15
-            ls -l /opt/tomcat/webapps/
+            
+            # සාර්ථකව extract වී ඇත්දැයි පරීක්ෂා කරන්න
+            ls -l /opt/tomcat/webapps/ | grep dentpulse
+            sudo systemctl status tomcat | grep Active
