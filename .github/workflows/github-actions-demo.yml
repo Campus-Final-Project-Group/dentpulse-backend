@@ -33,11 +33,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Tomcat nawathwala parana folder okkoma path karanna
+            # 1. Stop Tomcat and kill any stuck processes
             sudo systemctl stop tomcat || true
+            sudo pkill -9 -f tomcat || true
+            
+            # 2. Clean old files
             sudo rm -rf /opt/tomcat/webapps/ROOT
             sudo rm -f /opt/tomcat/webapps/ROOT.war
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
+            sudo rm -f /opt/tomcat/temp/tomcat.pid || true
 
       - name: Deploy ROOT.war to EC2 Tomcat
         uses: easingthemes/ssh-deploy@v5.1.0
@@ -49,14 +53,36 @@ jobs:
           TARGET: /opt/tomcat/webapps
           ARGS: "-rlgoDzvc"
 
-      - name: Start Tomcat & Fix Permissions
+      - name: Extract WAR and Fix Permissions
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # ROOT.war eka tomcat user ta ayithi karanna
+            # 1. Unzip tool eka install karanna (nathi nam)
+            sudo apt-get update && sudo apt-get install -y unzip
+
+            # 2. Manual unzip ROOT.war into ROOT folder
+            sudo mkdir -p /opt/tomcat/webapps/ROOT
+            sudo unzip -o /opt/tomcat/webapps/ROOT.war -d /opt/tomcat/webapps/ROOT
+
+            # 3. Ownership and Permissions (Wadagathma kalla)
+            sudo chown -R tomcat:tomcat /opt/tomcat/webapps/ROOT
             sudo chown tomcat:tomcat /opt/tomcat/webapps/ROOT.war
-            sudo chmod 644 /opt/tomcat/webapps/ROOT.war
+            sudo chmod -R 755 /opt/tomcat/webapps/ROOT
+            
+            # 4. Start Tomcat
+            sudo systemctl daemon-reload
             sudo systemctl start tomcat
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Checking if ROOT folder exists..."
+            ls -l /opt/tomcat/webapps/
+            sudo systemctl status tomcat | grep Active
