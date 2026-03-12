@@ -30,7 +30,8 @@ import java.util.Map;
 
 import static com.dentpulse.dentalsystem.entity.AppointmentStatus.*;
 
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 @Service
 @Transactional
 public class AppointmentService {
@@ -201,27 +202,30 @@ public class AppointmentService {
         return bookedTimes;
     }
 
-    public List<AppointmentResponseDto> getAppointmentsForUserAndFamily(String token) {
-        String email = jwtUtil.extractEmail(token);  // Extract user email from JWT token
-        User user = userRepo.findByEmail(email);  // Fetch user by email
+    public Page<AppointmentResponseDto> getAppointmentsForUserAndFamily(
+            String token,
+            Pageable pageable
+    ) {
+
+        String email = jwtUtil.extractEmail(token);
+        User user = userRepo.findByEmail(email);
 
         if (user == null) {
             throw new RuntimeException("User not found!");
         }
 
-        // Get all patients (self + family)
+        // get all patients (self + family)
         List<Patient> familyMembers = patientRepo.findAllByUserId(user.getId());
 
-        // Fetch appointments for the user and family members (including cancelled ones)
-        List<Appointment> appointments = new ArrayList<>();
-        for (Patient patient : familyMembers) {
-            appointments.addAll(appointmentRepo.findByPatientId(patient.getId()));  // Fetch all appointments, including cancelled ones
-        }
+        List<Long> patientIds = familyMembers.stream()
+                .map(Patient::getId)
+                .toList();
 
+        Page<Appointment> appointments =
+                appointmentRepo.findByPatientIdIn(patientIds, pageable);
 
-        // Convert Appointment entities to DTOs
-        List<AppointmentResponseDto> appointmentDtos = new ArrayList<>();
-        for (Appointment appointment : appointments) {
+        return appointments.map(appointment -> {
+
             AppointmentResponseDto dto = new AppointmentResponseDto();
             dto.setAppointmentId(appointment.getId());
             dto.setFullName(appointment.getPatient().getFullName());
@@ -231,21 +235,14 @@ public class AppointmentService {
             dto.setStatus(appointment.getStatus().name());
             dto.setType(appointment.getAppointmentType());
 
-
             if (appointment.getReview() != null) {
                 dto.setReviewId(appointment.getReview().getId());
                 dto.setRating(appointment.getReview().getRating());
                 dto.setComment(appointment.getReview().getComment());
             }
 
-
-            appointmentDtos.add(dto);
-
-
-
-        }
-
-        return appointmentDtos;
+            return dto;
+        });
     }
 
     public void cancelAppointment(Long appointmentId, String token) {
