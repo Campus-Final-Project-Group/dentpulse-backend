@@ -18,28 +18,21 @@ jobs:
           cache: 'maven'
 
       - name: Build WAR
-        # RAM ගැටලු මඟහරවා ගැනීමට threads සීමා කර ඇත
+        # Build එකේදී file name එක කෙටි කරගන්න පුළුවන් නම් වඩාත් හොඳයි
         run: mvn clean package -DskipTests -Dmaven.artifact.threads=1
 
-      - name: Safe Clean & Deploy
+      - name: Preparation & Cleanup
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 1. RAM එක නිදහස් කිරීමට Tomcat නවත්වා තත්පර 10ක් ඉන්න
+            # Tomcat stop කර පරණ දත්ත අයින් කිරීම
             sudo systemctl stop tomcat || true
-            sleep 10
-            
-            # 2. පරණ folders එකින් එක මකන්න (එකවර මැකීම RAM එකට බරකි)
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend*
-            sleep 2
-            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend*
-            sleep 2
-            sudo rm -rf /opt/tomcat/temp/*
-            
-            # 3. RAM එක පිරිසිදු කිරීමට cache එක flush කරන්න
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
+            sudo rm -rf /opt/tomcat/work/Catalina/localhost/dentpulse-backend-0.0.1-SNAPSHOT
+            # RAM නිදහස් කිරීම
             sudo sync && echo 3 | sudo tee /proc/sys/vm/drop_caches
 
       - name: Transfer WAR
@@ -51,17 +44,29 @@ jobs:
           SOURCE: "target/dentpulse-backend-0.0.1-SNAPSHOT.war"
           TARGET: "/opt/tomcat/webapps"
 
-      - name: Start & Health Check
+      - name: Set Permissions & Start
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Permissions හරියටම ලබා දීම (මෙය manual දැමීමේදී මෙන් ක්‍රියා කරයි)
             sudo chown ubuntu:ubuntu /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
+            sudo chmod 644 /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
+            
+            # Tomcat පණ ගැන්වීම
             sudo systemctl start tomcat
-            # පද්ධතිය පණ ගැන්වෙන තෙක් තත්පර 45ක් රැඳී සිටින්න
-            echo "Waiting for app to extract and start..."
-            sleep 45
-            # API එක වැඩදැයි පරීක්ෂා කිරීම
-            ls -ld /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT || echo "Deployment check failed"
+            
+            # Application එක extract වන තෙක් රැඳී සිටීම
+            echo "Waiting for extraction..."
+            sleep 40
+            
+            # Deployment එක සාර්ථක දැයි පරීක්ෂා කිරීම
+            if [ -d "/opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT" ]; then
+                echo "✅ Deployment Successful!"
+            else
+                echo "❌ Extraction Failed. Checking logs..."
+                tail -n 50 /opt/tomcat/logs/catalina.out
+                exit 1
+            fi
