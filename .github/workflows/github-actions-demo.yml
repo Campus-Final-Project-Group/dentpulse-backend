@@ -22,7 +22,7 @@ jobs:
       - name: Build WAR File
         run: mvn clean package -DskipTests
 
-      - name: Remove old WAR and copy new WAR to EC2
+      - name: Deploy WAR to EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -36,7 +36,8 @@ jobs:
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
             sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
 
-      - name: Upload new WAR to EC2
+        # Upload only the WAR file itself, not the folder
+      - name: Upload WAR
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -51,5 +52,4 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            sudo systemctl start tomcat
+          script: sudo systemctl start tomcat
