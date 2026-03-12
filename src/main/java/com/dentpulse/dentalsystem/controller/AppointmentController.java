@@ -9,6 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +51,11 @@ public class AppointmentController {
     }
 
     @GetMapping("/my-appointments")
-    public ResponseEntity<List<AppointmentResponseDto>> getMyAppointments(@RequestHeader("Authorization") String token) {
-        List<AppointmentResponseDto> appointments = appointmentService.getAppointmentsForUserAndFamily(token.substring(7));
+    public ResponseEntity<Page<AppointmentResponseDto>> getMyAppointments(@RequestHeader("Authorization") String token,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AppointmentResponseDto> appointments = appointmentService.getAppointmentsForUserAndFamily(token.substring(7),pageable);
         return ResponseEntity.ok(appointments);
     }
 

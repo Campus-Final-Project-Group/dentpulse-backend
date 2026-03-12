@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 @Service
 @RequiredArgsConstructor
 public class BillService {
@@ -52,11 +56,12 @@ public class BillService {
 
 
     // 📋 GET ALL BILLS
-    public List<BillResponseDto> getAllBills() {
-        return billRepository.findAll()
-                .stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+    public Page<BillResponseDto> getAllBills(int page,int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return billRepository
+                .findAll(pageable)
+                .map(this::mapToDto);
     }
 
     //UPDATE BILL (NO DATE UPDATE)

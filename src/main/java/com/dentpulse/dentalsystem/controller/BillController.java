@@ -6,6 +6,7 @@ import com.dentpulse.dentalsystem.service.BillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 @RestController
@@ -24,8 +25,9 @@ public class BillController {
 
     // 📋 Get ALL bills (no date)
     @GetMapping
-    public List<BillResponseDto> getAllBills() {
-        return billService.getAllBills();
+    public Page<BillResponseDto> getAllBills( @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size) {
+        return billService.getAllBills(page,size);
     }
 
     // 🗑️ Delete

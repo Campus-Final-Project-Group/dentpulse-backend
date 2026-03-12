@@ -17,6 +17,12 @@ public class ReminderLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "customer_name", nullable = false)
+    private String customerName;
+
+    @Column(name = "phone_number",nullable = false)
+    private String phoneNumber;
+
     @Column(nullable = false)
     private String email;
 
