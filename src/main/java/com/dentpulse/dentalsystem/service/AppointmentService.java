@@ -69,6 +69,13 @@ public class AppointmentService {
             dto.setStatus(appointment.getStatus().name());
             dto.setType(appointment.getAppointmentType());
 
+
+            if (appointment.getReview() != null) {
+                dto.setReviewId(appointment.getReview().getId());
+                dto.setRating(appointment.getReview().getRating());
+                dto.setComment(appointment.getReview().getComment());
+            }
+
             response.add(dto);
         }
 
@@ -223,7 +230,18 @@ public class AppointmentService {
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
             dto.setType(appointment.getAppointmentType());
+
+
+            if (appointment.getReview() != null) {
+                dto.setReviewId(appointment.getReview().getId());
+                dto.setRating(appointment.getReview().getRating());
+                dto.setComment(appointment.getReview().getComment());
+            }
+
+
             appointmentDtos.add(dto);
+
+
 
         }
 
@@ -284,6 +302,13 @@ public class AppointmentService {
             dto.setStatus(appointment.getStatus().name());
             dto.setType(appointment.getAppointmentType());
 
+
+            if (appointment.getReview() != null) {
+                dto.setReviewId(appointment.getReview().getId());
+                dto.setRating(appointment.getReview().getRating());
+                dto.setComment(appointment.getReview().getComment());
+            }
+
             response.add(dto);
         }
 
@@ -328,6 +353,14 @@ public class AppointmentService {
             dto.setStartTime(appointment.getStartTime().toString());
             dto.setStatus(appointment.getStatus().name());
             dto.setType(appointment.getAppointmentType());
+
+
+            if (appointment.getReview() != null) {
+                dto.setReviewId(appointment.getReview().getId());
+                dto.setRating(appointment.getReview().getRating());
+                dto.setComment(appointment.getReview().getComment());
+            }
+
             response.add(dto);
         }
 

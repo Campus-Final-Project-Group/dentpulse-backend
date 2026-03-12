@@ -14,4 +14,9 @@ public class AppointmentResponseDto {
     private String fullName;
 
     private AppointmentType type;
+
+    private Long reviewId;
+    private Integer rating;
+    private String comment;
 }
+

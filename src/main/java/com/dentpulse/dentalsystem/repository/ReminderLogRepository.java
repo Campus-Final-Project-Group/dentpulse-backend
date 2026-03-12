@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface ReminderLogRepository extends JpaRepository<ReminderLog, Long> {
 
-    List<ReminderLog> findAllByOrderBySentAtDesc(Pageable pageable);
+    Page<ReminderLog> findAllByOrderBySentAtDesc(Pageable pageable);
 
 }
