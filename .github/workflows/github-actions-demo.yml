@@ -13,40 +13,40 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up JDK
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Build WAR File
+      - name: Build WAR
         run: mvn clean package -DskipTests
 
-      - name: Deploy WAR to EC2
+      # Move WAR outside target folder
+      - name: Prepare WAR
+        run: cp target/dentpulse-backend-0.0.1-SNAPSHOT.war .
+
+      - name: Stop Tomcat and clean old deployment
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Stop Tomcat
             sudo systemctl stop tomcat
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT*
+            sudo rm -rf /opt/tomcat/webapps/target
 
-            # Remove old WAR and exploded folder
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT.war
-            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT
-
-        # Upload only the WAR file itself, not the folder
       - name: Upload WAR
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/dentpulse-backend-0.0.1-SNAPSHOT.war"
+          source: "dentpulse-backend-0.0.1-SNAPSHOT.war"
           target: "/opt/tomcat/webapps/"
 
-      - name: Restart Tomcat
+      - name: Start Tomcat
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
