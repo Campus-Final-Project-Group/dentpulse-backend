@@ -1,0 +1,55 @@
+name: Spring Boot CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build WAR
+        run: mvn clean package -DskipTests
+
+      # Move WAR outside target folder
+      - name: Prepare WAR
+        run: cp target/dentpulse-backend-0.0.1-SNAPSHOT.war .
+
+      - name: Stop Tomcat and clean old deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo systemctl stop tomcat
+            sudo rm -rf /opt/tomcat/webapps/dentpulse-backend-0.0.1-SNAPSHOT*
+            sudo rm -rf /opt/tomcat/webapps/target
+
+      - name: Upload WAR
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "dentpulse-backend-0.0.1-SNAPSHOT.war"
+          target: "/opt/tomcat/webapps/"
+
+      - name: Start Tomcat
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: sudo systemctl start tomcat
