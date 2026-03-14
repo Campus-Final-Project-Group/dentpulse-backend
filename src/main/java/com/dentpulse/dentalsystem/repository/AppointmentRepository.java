@@ -100,4 +100,24 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             AppointmentStatus status
     );
 
+    @Query("""
+    SELECT 
+        FUNCTION('DATE_FORMAT', a.startTime, '%H:00'),
+        COUNT(a)
+    FROM Appointment a
+    GROUP BY FUNCTION('DATE_FORMAT', a.startTime, '%H:00')
+    ORDER BY FUNCTION('DATE_FORMAT', a.startTime, '%H:00')
+    """)
+    List<Object[]> getAppointmentsByTime();
+
+
+    @Query("""
+    SELECT 
+        FUNCTION('DAYNAME', a.appointmentDate),
+        COUNT(a)
+    FROM Appointment a
+    GROUP BY FUNCTION('DAYNAME', a.appointmentDate)
+    """)
+    List<Object[]> getAppointmentsByDay();
+
 }
