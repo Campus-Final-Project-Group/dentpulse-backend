@@ -25,4 +25,14 @@ public interface BillRepository extends JpaRepository<Bill, Long> {
 
     @Query("SELECT COALESCE(SUM(b.amount),0) FROM Bill b WHERE b.billDate = :date")
     Double getTodayRevenue(@Param("date") LocalDate date);
+
+    @Query("""
+    SELECT 
+        FUNCTION('DATE_FORMAT', b.billDate, '%b') ,
+        SUM(b.amount)
+    FROM Bill b
+    GROUP BY FUNCTION('DATE_FORMAT', b.billDate, '%b')
+    ORDER BY MIN(b.billDate)
+    """)
+    List<Object[]> getMonthlyRevenue();
 }
