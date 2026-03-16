@@ -31,7 +31,7 @@ public class AiRecommendationService {
         int pastAppointments = findPastAppointmentCount(timeSlot);
 
         // 🔹 Python AI service endpoint
-        String url = "http://localhost:5000/predict";
+        String url = "http://api2.dentpulseclinic.com/predict";
 
         // 🔹 Request body
         Map<String, Object> body = new HashMap<>();
