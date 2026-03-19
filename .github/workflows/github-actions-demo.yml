@@ -9,6 +9,17 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DB_URL: ${{ secrets.DB_URL }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -22,7 +33,6 @@ jobs:
       - name: Build WAR
         run: mvn clean package -DskipTests
 
-      # Move WAR outside target folder
       - name: Prepare WAR
         run: cp target/dentpulse-backend-0.0.1-SNAPSHOT.war .
 
@@ -52,4 +62,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: sudo systemctl start tomcat
+          script: |
+            sudo systemctl start tomcat
+            sudo systemctl status tomcat --no-pager
